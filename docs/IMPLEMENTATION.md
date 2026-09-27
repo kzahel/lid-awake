@@ -2,7 +2,7 @@
 
 ## Components
 
-1. Native SwiftUI/AppKit menu bar application (`LSUIElement`, macOS 13+). It renders state, reads `SleepDisabled` from I/O Registry, tracks helper approval, sends heartbeats, and hosts Sparkle.
+1. Native AppKit menu bar application (`LSUIElement`, macOS 13+). It renders state, reads `SleepDisabled` from I/O Registry, tracks helper approval, sends heartbeats, holds a process activity while active to avoid App Nap delaying heartbeats, and hosts Sparkle.
 2. Bundled root LaunchDaemon registered by `SMAppService.daemon(plistName:)`. The daemon owns all writes to `/usr/bin/pmset -a disablesleep` and validates each XPC client's code-signing requirement before accepting a connection.
 3. A shared Objective-C-compatible XPC protocol with a narrow command surface: enable for a bounded duration, disable, heartbeat, status. No arbitrary command execution or path arguments.
 4. Sparkle 2 update feed with per-app EdDSA key. A GitHub Actions macOS runner builds, signs, notarizes, staples, and publishes a DMG, update ZIP, and appcast after a version tag.

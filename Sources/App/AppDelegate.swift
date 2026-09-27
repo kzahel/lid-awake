@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     private var chosenMinutes = 120
     private var busy = false
     private var setupPending = false
+    private var activity: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -70,6 +71,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     }
 
     private func updateIcon() {
+        if active && activity == nil {
+            activity = ProcessInfo.processInfo.beginActivity(
+                options: [.idleSystemSleepDisabled, .suddenTerminationDisabled],
+                reason: "Lid Awake session heartbeat")
+        } else if !active, let activity {
+            ProcessInfo.processInfo.endActivity(activity)
+            self.activity = nil
+        }
         item.button?.image = NSImage(systemSymbolName: "laptopcomputer", accessibilityDescription: active ? "Lid Awake on" : "Lid Awake off")
         item.button?.contentTintColor = observed == true ? .systemOrange : nil
     }
