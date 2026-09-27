@@ -24,6 +24,8 @@ Lid Awake checks for updates daily by default and lets you choose when to instal
 
 [Compare Lid Awake with Lidless and Awayke](COMPETITIVE-ANALYSIS.md) for size, helper security, recovery, safety features, updates, and testing. Lid Awake favors short sessions with a fixed end time and a small menu; Lidless offers more controls, while Awayke has a quicker toggle and more session modes. The comparison also lists what Lid Awake has not tested yet.
 
+The [roadmap](docs/ROADMAP.md) prioritizes reliable sleep restoration, helper security, and physical acceptance tests before adding more session modes.
+
 ## More information
 
 - [How it works and its safety limits](docs/IMPLEMENTATION.md)
