@@ -20,6 +20,10 @@ Use a signed, notarized app copied to `/Applications`. On first launch, choose *
 
 With Lid Awake off, expect `No`. With it on, expect `Yes`. Quit the app while on; expect normal sleep to return. Repeat with a forced app termination and wait up to 90 seconds for the watchdog. Test a helper restart in an isolated Mac testbed and verify that the recovery marker restores normal sleep.
 
+## Menu bar contrast
+
+Use both a light wallpaper and a solid black wallpaper, with macOS in dark appearance. Check that the laptop badge is visible while Lid Awake is off and while it is on. The off badge should be neutral with a white laptop; the active badge should be orange with a black laptop. Confirm that the menu still opens from each state.
+
 ## Physical lid test
 
 Do this on a ventilated surface. Start a foreground heartbeat in Terminal:
