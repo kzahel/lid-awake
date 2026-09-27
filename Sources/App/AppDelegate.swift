@@ -45,7 +45,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     func menuWillOpen(_ menu: NSMenu) { renderMenu() }
 
     private func tick() {
-        helper.heartbeat()
+        if active { helper.heartbeat() }
         refresh()
     }
 
