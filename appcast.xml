@@ -3,12 +3,12 @@
     <channel>
         <title>LidAwake</title>
         <item>
-            <title>0.0.1</title>
-            <pubDate>Sun, 27 Sep 2026 09:00:31 +0000</pubDate>
-            <sparkle:version>1</sparkle:version>
-            <sparkle:shortVersionString>0.0.1</sparkle:shortVersionString>
+            <title>0.0.2</title>
+            <pubDate>Sun, 27 Sep 2026 09:08:15 +0000</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>0.0.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/kzahel/lid-awake/releases/download/v0.0.1/LidAwake-v0.0.1.zip" length="1215681" type="application/octet-stream" sparkle:edSignature="wGcnAzUjUyECpGy7WMoPq/utWSWDM6xsDTJlCuFnu0C1DZWRLygT9vZwidbNI/+YvLmmxwLwAf3xNTdQ6aiMDQ=="/>
+            <enclosure url="https://github.com/kzahel/lid-awake/releases/download/v0.0.2/LidAwake-v0.0.2.zip" length="1215667" type="application/octet-stream" sparkle:edSignature="g3ZFOkfbxjHidnBHuth6OG3O7mrCT5mnpQQTlXfx8qG7d6RNLar2fSSOO7CVqT6ZrAHP4RTE/fxz4Fh7uyHECQ=="/>
         </item>
     </channel>
 </rss>
