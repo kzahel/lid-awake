@@ -111,8 +111,12 @@ jobs:
           set -euo pipefail
           tag="$GITHUB_REF_NAME"
           dir="build/release/$tag"
+          release_flags=(--draft)
+          if [[ "$tag" == v0.0.* ]]; then
+            release_flags+=(--prerelease)
+          fi
           gh release create "$tag" "$dir/LidAwake-$tag.dmg" \
-            "$dir/appcast-input/LidAwake-$tag.zip" --draft --title "Lid Awake $tag" \
+            "$dir/appcast-input/LidAwake-$tag.zip" "${release_flags[@]}" --title "Lid Awake $tag" \
             --notes "Signed and notarized macOS release."
       - name: Publish release and appcast
         env:
