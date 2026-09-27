@@ -35,7 +35,7 @@ private func disable(_ service: HelperService) {
 }
 
 require(geteuid() == 0, "run as root in a disposable VM")
-require(CommandLine.arguments.count == 2, "expected exercise or recover")
+require(CommandLine.arguments.count == 2, "expected exercise, recover, or watchdog")
 
 switch CommandLine.arguments[1] {
 case "exercise":
@@ -52,6 +52,22 @@ case "recover":
         require(PowerState.observedSleepDisabled() == false, "restart did not restore normal sleep")
     }
     print("Helper restart recovery passed")
+case "watchdog":
+    require(PowerState.observedSleepDisabled() == false, "normal sleep must be enabled before watchdog testing")
+    let service = HelperService(label: label)
+    enable(service)
+    var restored = false
+    for _ in 0..<12 {
+        Thread.sleep(forTimeInterval: 10)
+        if PowerState.observedSleepDisabled() == false {
+            restored = true
+            break
+        }
+    }
+    withExtendedLifetime(service) {
+        require(restored, "watchdog did not restore normal sleep within 120 seconds")
+    }
+    print("Helper no-heartbeat watchdog passed")
 default:
-    require(false, "expected exercise or recover")
+    require(false, "expected exercise, recover, or watchdog")
 }

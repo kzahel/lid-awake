@@ -28,3 +28,4 @@ trap cleanup EXIT
 
 "$binary" exercise
 "$binary" recover
+"$binary" watchdog

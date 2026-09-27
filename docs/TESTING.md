@@ -6,8 +6,9 @@ On a disposable Tart Mac VM, the privileged helper's power-setting logic can
 also be checked without changing Login Items consent. Stage this repository
 inside the guest's read-only share and run
 `sudo -n bash scripts/test-helper-in-vm.sh` from that staged copy. The script
-requires a `VirtualMac` model and root, verifies on/off plus marker recovery
-after a process restart, and restores normal sleep from an exit trap. This
+requires a `VirtualMac` model and root, verifies on/off, marker recovery
+after a process restart, and the 90-second no-heartbeat watchdog. It restores
+normal sleep from an exit trap. This
 exercises the helper logic directly; the signed app's XPC connection and
 one-time macOS approval still require the UI test below.
 
