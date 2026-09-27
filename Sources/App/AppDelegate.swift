@@ -71,13 +71,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
 
     private func updateIcon() {
         item.button?.image = NSImage(systemSymbolName: "laptopcomputer", accessibilityDescription: active ? "Lid Awake on" : "Lid Awake off")
-        item.button?.contentTintColor = active ? .systemOrange : nil
+        item.button?.contentTintColor = observed == true ? .systemOrange : nil
     }
 
     private func renderMenu() {
         menu.removeAllItems()
         let headline: String
         if active { headline = "On · \(max(0, remaining / 60)) min remaining" }
+        else if observed == true && helper.status != .enabled { headline = "Sleep disabled · helper unavailable" }
         else if observed == true { headline = "Sleep disabled by another tool" }
         else if observed == false { headline = "Off · normal sleep" }
         else { headline = "Sleep state unavailable" }
@@ -109,6 +110,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
             let setup = NSMenuItem(title: helper.status == .requiresApproval ? "Approve Helper…" : "Set Up Helper…", action: #selector(setupHelper), keyEquivalent: "")
             setup.target = self
             menu.addItem(setup)
+        }
+        if observed == true && !active {
+            let recovery = NSMenuItem(title: "Sleep Recovery Instructions…", action: #selector(showRecovery), keyEquivalent: "")
+            recovery.target = self
+            menu.addItem(recovery)
         }
         menu.addItem(.separator())
 
@@ -192,6 +198,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     @objc private func checkForUpdates() {
         guard !active else { return }
         updater.updater.checkForUpdates()
+    }
+
+    @objc private func showRecovery() {
+        showInfo("Restore Normal Sleep", "Lid Awake cannot control the current sleep setting. If no other tool should own it, run this in Terminal:\n\nsudo /usr/bin/pmset -a disablesleep 0")
     }
 
     @objc private func toggleAutomaticChecks() {

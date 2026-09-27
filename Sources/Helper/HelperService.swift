@@ -34,7 +34,14 @@ final class HelperService: NSObject, LidAwakeHelperProtocol {
         marker = dir.appendingPathComponent(label + ".session")
         super.init()
         if FileManager.default.fileExists(atPath: marker.path) {
-            if setSleepDisabled(false).0 { try? FileManager.default.removeItem(at: marker) }
+            if setSleepDisabled(false).0 {
+                try? FileManager.default.removeItem(at: marker)
+            } else {
+                // Keep retrying if recovery failed during startup.
+                active = true
+                deadline = 0
+                lastHeartbeat = 0
+            }
         }
         let timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now() + 5, repeating: 5)

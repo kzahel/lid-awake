@@ -8,11 +8,31 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  macos:
+  build:
     runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build app
+        run: |
+          xcodebuild -quiet -project LidAwake.xcodeproj -scheme LidAwake \
+            -configuration Debug -derivedDataPath build/DerivedData \
+            -destination 'generic/platform=macOS' CODE_SIGNING_ALLOWED=NO build
+      - name: Test session safety logic
+        run: |
+          xcodebuild -quiet -project LidAwake.xcodeproj -scheme LidAwake \
+            -configuration Debug -derivedDataPath build/DerivedData \
+            -destination 'platform=macOS,arch=arm64' CODE_SIGNING_ALLOWED=NO test
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: macos-26
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,7 +40,6 @@ jobs:
       - name: Select Xcode
         run: xcodebuild -version
       - name: Validate release credentials
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           CERT: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
           CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -35,7 +54,6 @@ jobs:
             test -n "$value" || { echo 'A release credential is missing.' >&2; exit 1; }
           done
       - name: Import signing certificate
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           CERT: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
           CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -55,7 +73,6 @@ jobs:
             -s -k "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/build.keychain-db"
           security find-identity -v -p codesigning "$RUNNER_TEMP/build.keychain-db" | grep 'Developer ID Application'
       - name: Prepare notarization and updater keys
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           ASC_KEY: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
           SPARKLE_KEY: ${{ secrets.SPARKLE_ED25519_PRIVATE_KEY }}
@@ -64,34 +81,22 @@ jobs:
           umask 077
           printf '%s' "$ASC_KEY" | base64 --decode > "$RUNNER_TEMP/asc-key.p8"
           printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle-ed25519.key"
-      - name: Build app
+      - name: Build signed release
         run: |
           set -euo pipefail
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            version="${GITHUB_REF_NAME#v}"
-            IFS=. read -r major minor patch <<< "$version"
-            [[ "$major" =~ ^[0-9]+$ && "$minor" =~ ^[0-9]+$ && "$patch" =~ ^[0-9]+$ ]]
-            (( minor < 1000 && patch < 1000 ))
-            build_number=$((major * 1000000 + minor * 1000 + patch))
-            xcodebuild -quiet -project LidAwake.xcodeproj -scheme LidAwake archive \
-              -archivePath build/LidAwake.xcarchive -configuration Release -derivedDataPath build/DerivedData \
-              -destination 'generic/platform=macOS' ARCHS='arm64 x86_64' \
-              CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY='Developer ID Application: Kyle Graehl (VD7BYQ6ABM)' \
-              MARKETING_VERSION="$version" CURRENT_PROJECT_VERSION="$build_number"
-            xcodebuild -quiet -exportArchive -archivePath build/LidAwake.xcarchive \
-              -exportPath build/export -exportOptionsPlist ExportOptions.plist
-          else
-            xcodebuild -quiet -project LidAwake.xcodeproj -scheme LidAwake \
-              -configuration Debug -derivedDataPath build/DerivedData \
-              -destination 'generic/platform=macOS' CODE_SIGNING_ALLOWED=NO build
-          fi
-      - name: Test session safety logic
-        run: |
-          xcodebuild -quiet -project LidAwake.xcodeproj -scheme LidAwake \
-            -configuration Debug -derivedDataPath build/DerivedData \
-            -destination 'platform=macOS,arch=arm64' CODE_SIGNING_ALLOWED=NO test
+          version="${GITHUB_REF_NAME#v}"
+          IFS=. read -r major minor patch <<< "$version"
+          [[ "$major" =~ ^[0-9]+$ && "$minor" =~ ^[0-9]+$ && "$patch" =~ ^[0-9]+$ ]]
+          (( minor < 1000 && patch < 1000 ))
+          build_number=$((major * 1000000 + minor * 1000 + patch))
+          xcodebuild -quiet -project LidAwake.xcodeproj -scheme LidAwake archive \
+            -archivePath build/LidAwake.xcarchive -configuration Release -derivedDataPath build/DerivedData \
+            -destination 'generic/platform=macOS' ARCHS='arm64 x86_64' \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY='Developer ID Application: Kyle Graehl (VD7BYQ6ABM)' \
+            MARKETING_VERSION="$version" CURRENT_PROJECT_VERSION="$build_number"
+          xcodebuild -quiet -exportArchive -archivePath build/LidAwake.xcarchive \
+            -exportPath build/export -exportOptionsPlist ExportOptions.plist
       - name: Package, notarize, and sign update
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           RELEASE_TAG: ${{ github.ref_name }}
           ASC_API_KEY_FILE: ${{ runner.temp }}/asc-key.p8
@@ -100,7 +105,6 @@ jobs:
           SPARKLE_PRIVATE_KEY_FILE: ${{ runner.temp }}/sparkle-ed25519.key
         run: bash scripts/package-release.sh
       - name: Create draft release
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -111,7 +115,6 @@ jobs:
             "$dir/appcast-input/LidAwake-$tag.zip" --draft --title "Lid Awake $tag" \
             --notes "Signed and notarized macOS release."
       - name: Publish release and appcast
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -128,7 +131,7 @@ jobs:
             git push origin main
           fi
       - name: Retain release artifacts
-        if: always() && startsWith(github.ref, 'refs/tags/v')
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lid-awake-${{ github.ref_name }}

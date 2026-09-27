@@ -11,6 +11,7 @@ Keep local agents and other processes running while a MacBook is carried with it
 - The user chooses a duration before enabling: 30 minutes, 1 hour, 2 hours (default), or 4 hours. The privileged helper enforces the deadline independently of the UI.
 - If the app quits, crashes, or stops heartbeating, the helper restores normal sleep within 90 seconds. If the helper restarts while it owns an active override, it restores normal sleep immediately.
 - Turning off always restores normal sleep for an override owned by Lid Awake. If another program already disabled sleep, Lid Awake reports that state and refuses to take ownership.
+- If sleep is disabled while the helper is unavailable, the menu remains orange and offers a manual `sudo pmset -a disablesleep 0` recovery instruction.
 - First use presents a clear explanation, then **Set Up Helper**. The app registers its bundled daemon with `SMAppService`; if macOS requires approval, it shows **Open System Settings** and watches for the approved state. No sudo password is collected by the app.
 - On battery, the helper restores normal sleep at 15% charge. The UI explains the cutoff before starting.
 - The menu has **Check for Updates…**. Sparkle checks daily by default and announces available updates. Installation is offered only when Lid Awake is off. Silent installation is disabled for MVP.
