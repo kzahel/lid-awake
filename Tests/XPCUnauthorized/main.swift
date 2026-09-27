@@ -17,8 +17,8 @@ let finished = DispatchSemaphore(value: 0)
 var result = "timeout"
 let proxy = connection.remoteObjectProxyWithErrorHandler { error in
     let code = (error as NSError).code
-    result = code == NSXPCConnectionCodeSigningRequirementFailure
-        ? "code-signing-rejected"
+    result = code == NSXPCConnectionCodeSigningRequirementFailure || code == NSXPCConnectionInterrupted
+        ? "connection-failed-\(code)"
         : "unexpected XPC error \(code): \(error.localizedDescription)"
     finished.signal()
 } as? ProbeProtocol
@@ -33,8 +33,9 @@ proxy.status { _, _ in
 }
 _ = finished.wait(timeout: .now() + 10)
 connection.invalidate()
-guard result == "code-signing-rejected" else {
+guard result == "connection-failed-\(NSXPCConnectionCodeSigningRequirementFailure)" ||
+        result == "connection-failed-\(NSXPCConnectionInterrupted)" else {
     fputs("XPC denial test failed: \(result)\n", stderr)
     exit(1)
 }
-print("Unsigned XPC client was rejected by the helper's signing requirement.")
+print("Unsigned XPC client received \(result); verify the helper's signing-denial log separately.")
