@@ -1,0 +1,124 @@
+name: LidAwake
+options:
+  bundleIdPrefix: com.kzahel
+  deploymentTarget:
+    macOS: "13.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: VD7BYQ6ABM
+    CODE_SIGN_STYLE: Manual
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.8.0
+targets:
+  LidAwake:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/App
+      - Sources/Shared
+      - Resources/Assets.xcassets
+    info:
+      path: Sources/App/Info.plist
+      properties:
+        LSUIElement: true
+        CFBundleName: Lid Awake
+        CFBundleDisplayName: Lid Awake
+        CFBundleIconName: AppIcon
+        LSApplicationCategoryType: public.app-category.utilities
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "13.0"
+        NSHumanReadableCopyright: "© 2026 Kyle Graehl"
+        SUFeedURL: https://raw.githubusercontent.com/kzahel/lid-awake/main/appcast.xml
+        SUPublicEDKey: tlX08FBMDe222zMBAHz3uzqTN3JOCRVNquJBVYYkgbk=
+        SUEnableAutomaticChecks: true
+        SUAutomaticallyUpdate: false
+        SUAllowsAutomaticUpdates: false
+        SUScheduledCheckInterval: 86400
+    settings:
+      base:
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1000"
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_IDENTITY: "Developer ID Application"
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: com.kzahel.lidawake.dev
+          CODE_SIGN_IDENTITY: "Apple Development"
+        Release:
+          PRODUCT_BUNDLE_IDENTIFIER: com.kzahel.lidawake
+    dependencies:
+      - target: LidAwakeHelper
+        copy:
+          destination: executables
+      - package: Sparkle
+        product: Sparkle
+    postBuildScripts:
+      - name: Bundle privileged helper registration
+        basedOnDependencyAnalysis: false
+        script: |
+          set -euo pipefail
+          label="${PRODUCT_BUNDLE_IDENTIFIER}.helper"
+          dir="${CODESIGNING_FOLDER_PATH}/Contents/Library/LaunchDaemons"
+          mkdir -p "$dir"
+          cat > "$dir/$label.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>Label</key><string>$label</string>
+            <key>BundleProgram</key><string>Contents/MacOS/LidAwakeHelper</string>
+            <key>MachServices</key><dict><key>$label</key><true/></dict>
+            <key>AssociatedBundleIdentifiers</key><array><string>${PRODUCT_BUNDLE_IDENTIFIER}</string></array>
+            <key>EnvironmentVariables</key><dict><key>LID_AWAKE_MACH_LABEL</key><string>$label</string></dict>
+            <key>RunAtLoad</key><true/>
+            <key>KeepAlive</key><true/>
+          </dict></plist>
+          EOF
+          plutil -lint "$dir/$label.plist"
+  LidAwakeHelper:
+    type: tool
+    platform: macOS
+    sources:
+      - Sources/Helper
+      - Sources/Shared
+    settings:
+      base:
+        PRODUCT_NAME: LidAwakeHelper
+        ENABLE_HARDENED_RUNTIME: YES
+        SKIP_INSTALL: YES
+        GENERATE_INFOPLIST_FILE: YES
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        CODE_SIGN_IDENTITY: "Developer ID Application"
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: com.kzahel.lidawake.dev.helper
+          CODE_SIGN_IDENTITY: "Apple Development"
+        Release:
+          PRODUCT_BUNDLE_IDENTIFIER: com.kzahel.lidawake.helper
+  LidAwakeTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests
+      - Sources/Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kzahel.lidawake.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO
+schemes:
+  LidAwake:
+    build:
+      targets:
+        LidAwake: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+    test:
+      targets:
+        - LidAwakeTests

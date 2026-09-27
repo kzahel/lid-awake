@@ -1,0 +1,119 @@
+#!/bin/bash
+
+set -euo pipefail
+
+readonly PMSET=/usr/bin/pmset
+readonly IOREG=/usr/sbin/ioreg
+readonly SED=/usr/bin/sed
+readonly SLEEP=/bin/sleep
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  lid-awake          Keep the Mac awake with its lid closed until Ctrl-C
+  lid-awake run      Same as above
+  lid-awake status   Show whether system sleep is currently disabled
+  lid-awake off      Restore normal sleep immediately
+  lid-awake help     Show this help
+USAGE
+}
+
+sleep_disabled() {
+  "$IOREG" -r -c IOPMrootDomain -d 1 -l |
+    "$SED" -n 's/.*"SleepDisabled" = //p' |
+    /usr/bin/head -n 1
+}
+
+show_status() {
+  local state
+  state="$(sleep_disabled)"
+
+  case "$state" in
+    Yes)
+      echo "Closed-lid override: on (system sleep is disabled)"
+      ;;
+    No)
+      echo "Closed-lid override: off (normal sleep is enabled)"
+      ;;
+    *)
+      echo "Unable to read the macOS SleepDisabled state." >&2
+      return 1
+      ;;
+  esac
+}
+
+require_root() {
+  if (( EUID != 0 )); then
+    exec /usr/bin/sudo -- "$0" "$@"
+  fi
+}
+
+restore_sleep() {
+  local exit_status=$?
+
+  trap - EXIT HUP INT TERM
+  "$PMSET" -a disablesleep 0
+  echo
+  echo "Normal sleep restored; closing the lid will sleep the Mac."
+  exit "$exit_status"
+}
+
+run_session() {
+  if [[ "$(sleep_disabled)" == Yes ]]; then
+    cat >&2 <<'MESSAGE'
+System sleep was already disabled, so this command will not take ownership of
+the setting. Run `lid-awake off` to restore normal sleep first.
+MESSAGE
+    return 1
+  fi
+
+  require_root run
+
+  trap restore_sleep EXIT
+  trap 'exit 129' HUP
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+
+  "$PMSET" -a disablesleep 1
+
+  if [[ "$(sleep_disabled)" != Yes ]]; then
+    echo "macOS did not enable the closed-lid override." >&2
+    return 1
+  fi
+
+  cat <<'MESSAGE'
+Closed-lid mode enabled. The Mac and local agents will keep running.
+Keep the Mac on power and on a hard, ventilated surface.
+
+Press Ctrl-C to restore normal sleep.
+MESSAGE
+
+  while :; do
+    "$SLEEP" 86400
+  done
+}
+
+turn_off() {
+  require_root off
+  "$PMSET" -a disablesleep 0
+  show_status
+}
+
+case "${1:-run}" in
+  run)
+    run_session
+    ;;
+  status)
+    show_status
+    ;;
+  off|reset)
+    turn_off
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
