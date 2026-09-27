@@ -2,6 +2,13 @@ import AppKit
 import Foundation
 import ServiceManagement
 
+struct HelperHealth {
+    let build: Int
+    let active: Bool
+    let remaining: Int
+    let recoveryIssue: String?
+}
+
 final class HelperClient {
     private var connection: NSXPCConnection?
 
@@ -16,6 +23,23 @@ final class HelperClient {
     func register() throws { try service.register() }
 
     func openApprovalSettings() { SMAppService.openSystemSettingsLoginItems() }
+
+    func repair(completion: @escaping (String?) -> Void) {
+        connection?.invalidate()
+        connection = nil
+        let registeredService = service
+        registeredService.unregister { error in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if let error { completion(error.localizedDescription); return }
+                do {
+                    try registeredService.register()
+                    completion(nil)
+                } catch {
+                    completion(error.localizedDescription)
+                }
+            }
+        }
+    }
 
     private func proxy(onError: @escaping (String) -> Void) -> LidAwakeHelperProtocol? {
         if connection == nil {
@@ -61,6 +85,28 @@ final class HelperClient {
         guard let remote = proxy(onError: { _ in finish(nil, 0) }) else { finish(nil, 0); return }
         remote.status { active, remaining in finish(active, remaining) }
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) { finish(nil, 0) }
+    }
+
+    func getHealth(completion: @escaping (HelperHealth?, String?) -> Void) {
+        var finished = false
+        let finish: (HelperHealth?, String?) -> Void = { health, error in
+            DispatchQueue.main.async {
+                guard !finished else { return }
+                finished = true
+                completion(health, error)
+            }
+        }
+        guard let remote = proxy(onError: { finish(nil, $0) }) else {
+            finish(nil, "Cannot connect to the helper.")
+            return
+        }
+        remote.health { build, active, remaining, recoveryIssue in
+            finish(HelperHealth(build: build, active: active, remaining: remaining,
+                                recoveryIssue: recoveryIssue), nil)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            finish(nil, "The helper did not answer its health check.")
+        }
     }
 
     private func call(_ completion: @escaping (Bool, String?) -> Void,

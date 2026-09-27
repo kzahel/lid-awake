@@ -1,5 +1,11 @@
 import Foundation
 
+enum PowerSource: Equatable {
+    case ac
+    case battery(Int)
+    case unknown
+}
+
 enum PowerState {
     static func sleepDisabled(from output: String) -> Bool? {
         for line in output.split(separator: "\n") where line.contains("\"SleepDisabled\"") {
@@ -14,14 +20,21 @@ enum PowerState {
         return sleepDisabled(from: result.output)
     }
 
-    static func batteryPercent() -> Int? {
-        guard let result = command("/usr/bin/pmset", ["-g", "batt"]), result.code == 0 else { return nil }
-        guard result.output.contains("Battery Power") else { return nil }
+    static func powerSource(from output: String) -> PowerSource {
+        if output.contains("AC Power") { return .ac }
+        guard output.contains("Battery Power") else { return .unknown }
         let pattern = try? NSRegularExpression(pattern: "([0-9]{1,3})%")
-        let range = NSRange(result.output.startIndex..., in: result.output)
-        guard let match = pattern?.firstMatch(in: result.output, range: range),
-              let numberRange = Range(match.range(at: 1), in: result.output) else { return nil }
-        return Int(result.output[numberRange])
+        let range = NSRange(output.startIndex..., in: output)
+        guard let match = pattern?.firstMatch(in: output, range: range),
+              let numberRange = Range(match.range(at: 1), in: output),
+              let percent = Int(output[numberRange]),
+              (0...100).contains(percent) else { return .unknown }
+        return .battery(percent)
+    }
+
+    static func currentPowerSource() -> PowerSource {
+        guard let result = command("/usr/bin/pmset", ["-g", "batt"]), result.code == 0 else { return .unknown }
+        return powerSource(from: result.output)
     }
 
     static func command(_ executable: String, _ arguments: [String]) -> (code: Int32, output: String)? {

@@ -88,10 +88,14 @@ targets:
     settings:
       base:
         PRODUCT_NAME: LidAwakeHelper
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1000"
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
         GENERATE_INFOPLIST_FILE: YES
         CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        INFOPLIST_KEY_CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        INFOPLIST_KEY_CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CODE_SIGN_IDENTITY: "Developer ID Application"
       configs:
         Debug:

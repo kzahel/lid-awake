@@ -22,6 +22,7 @@ trap cleanup EXIT
   "$repo_dir/Sources/Shared/PowerState.swift" \
   "$repo_dir/Sources/Shared/SessionPolicy.swift" \
   "$repo_dir/Sources/Shared/HelperProtocol.swift" \
+  "$repo_dir/Sources/Helper/PowerController.swift" \
   "$repo_dir/Sources/Helper/HelperService.swift" \
   "$repo_dir/Tests/HelperIntegration/main.swift" \
   -o "$binary"
@@ -29,3 +30,4 @@ trap cleanup EXIT
 "$binary" exercise
 "$binary" recover
 "$binary" watchdog
+"$binary" retry

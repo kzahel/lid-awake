@@ -21,4 +21,5 @@ enum HelperIdentity {
     func disable(withReply reply: @escaping (Bool, String?) -> Void)
     func heartbeat(withReply reply: @escaping (Bool) -> Void)
     func status(withReply reply: @escaping (Bool, Int) -> Void)
+    func health(withReply reply: @escaping (Int, Bool, Int, String?) -> Void)
 }

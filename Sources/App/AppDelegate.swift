@@ -15,6 +15,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     private var busy = false
     private var setupPending = false
     private var activity: NSObjectProtocol?
+    private var helperNeedsRepair = false
+    private var helperProblem: String?
+    private var recoveryIssue: String?
+    private var repairing = false
+
+    private var expectedHelperBuild: Int {
+        Int(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "") ?? 0
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -36,9 +44,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
 
     func updater(_ updater: SPUUpdater, shouldProceedWithUpdate item: SUAppcastItem,
                  updateCheck: SPUUpdateCheck) throws {
-        if active {
+        if active || observed != false || repairing {
             throw NSError(domain: "LidAwake.Update", code: 1,
-                          userInfo: [NSLocalizedDescriptionKey: "Turn off Lid Awake before installing an update."])
+                          userInfo: [NSLocalizedDescriptionKey: "Restore normal sleep before installing an update."])
         }
     }
 
@@ -52,20 +60,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     private func refresh() {
         observed = PowerState.observedSleepDisabled()
         if helper.status == .enabled {
-            helper.getStatus { [weak self] isActive, seconds in
+            helper.getHealth { [weak self] health, error in
                 guard let self else { return }
-                if let isActive { self.active = isActive; self.remaining = seconds }
+                if let health {
+                    self.active = health.active
+                    self.remaining = health.remaining
+                    self.recoveryIssue = health.recoveryIssue
+                    self.helperNeedsRepair = health.build != self.expectedHelperBuild
+                    self.helperProblem = self.helperNeedsRepair
+                        ? "The registered helper is build \(health.build); this app is build \(self.expectedHelperBuild)."
+                        : nil
+                } else {
+                    self.helperNeedsRepair = true
+                    self.helperProblem = error ?? "The helper is not responding."
+                    if self.observed == false { self.active = false; self.recoveryIssue = nil }
+                }
                 self.updateIcon()
                 self.renderMenu()
+                if self.setupPending && !self.helperNeedsRepair {
+                    self.setupPending = false
+                    self.showInfo("Helper Ready", "The helper is approved. Choose Keep Awake when you are ready.")
+                }
             }
         } else {
             active = false
+            helperNeedsRepair = false
+            helperProblem = nil
+            recoveryIssue = nil
             updateIcon()
             renderMenu()
-        }
-        if setupPending && helper.status == .enabled {
-            setupPending = false
-            showInfo("Helper Ready", "The helper is approved. Choose Keep Awake when you are ready.")
         }
     }
 
@@ -104,14 +127,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
             return true
         }
         icon.isTemplate = false
-        icon.accessibilityDescription = active ? "Lid Awake on" : "Lid Awake off"
+        icon.accessibilityDescription = enabled ? (active ? "Lid Awake on" : "Sleep disabled") : "Lid Awake off"
         item.button?.image = icon
     }
 
     private func renderMenu() {
         menu.removeAllItems()
         let headline: String
-        if active { headline = "On · \(max(0, remaining / 60)) min remaining" }
+        if repairing { headline = "Repairing helper…" }
+        else if recoveryIssue != nil { headline = "Restoring sleep · retrying" }
+        else if helperNeedsRepair && observed == false { headline = "Helper needs repair" }
+        else if observed == true && helperNeedsRepair { headline = "Sleep disabled · helper unavailable" }
+        else if active && observed == false { headline = "Sleep changed outside Lid Awake" }
+        else if active { headline = "On · \(max(0, remaining / 60)) min remaining" }
         else if observed == true && helper.status != .enabled { headline = "Sleep disabled · helper unavailable" }
         else if observed == true { headline = "Sleep disabled by another tool" }
         else if observed == false { headline = "Off · normal sleep" }
@@ -123,7 +151,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
 
         let toggle = NSMenuItem(title: active ? "Restore Normal Sleep" : "Keep Awake", action: #selector(toggleAwake), keyEquivalent: "")
         toggle.target = self
-        toggle.isEnabled = !busy && (active || observed == false)
+        toggle.isEnabled = !busy && !repairing && (active || (observed == false && !helperNeedsRepair))
         menu.addItem(toggle)
 
         let durationMenu = NSMenu()
@@ -145,7 +173,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
             setup.target = self
             menu.addItem(setup)
         }
-        if observed == true && !active {
+        if helperNeedsRepair && helper.status == .enabled {
+            let repair = NSMenuItem(title: "Repair Helper…", action: #selector(repairHelper), keyEquivalent: "")
+            repair.target = self
+            repair.isEnabled = !repairing && !busy && !active && observed == false
+            menu.addItem(repair)
+        }
+        if observed == true && (!active || recoveryIssue != nil || helperNeedsRepair) {
             let recovery = NSMenuItem(title: "Sleep Recovery Instructions…", action: #selector(showRecovery), keyEquivalent: "")
             recovery.target = self
             menu.addItem(recovery)
@@ -154,7 +188,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
 
         let update = NSMenuItem(title: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: "")
         update.target = self
-        update.isEnabled = !active && updater.updater.canCheckForUpdates
+        update.isEnabled = !active && observed == false && !repairing && updater.updater.canCheckForUpdates
         menu.addItem(update)
         let checks = NSMenuItem(title: "Automatically Check for Updates", action: #selector(toggleAutomaticChecks), keyEquivalent: "")
         checks.target = self
@@ -185,6 +219,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
             return
         }
         guard helper.status == .enabled else { setupHelper(); return }
+        guard !helperNeedsRepair else { showError(helperProblem ?? "Repair the helper before starting a session."); return }
         let alert = NSAlert()
         alert.messageText = "Keep running with the lid closed?"
         alert.informativeText = "Lid Awake will restore normal sleep after \(chosenMinutes) minutes, if this app stops responding, or when battery reaches 15%. Keep the Mac ventilated while it runs."
@@ -230,12 +265,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     }
 
     @objc private func checkForUpdates() {
-        guard !active else { return }
+        guard !active && observed == false && !repairing else { return }
         updater.updater.checkForUpdates()
     }
 
     @objc private func showRecovery() {
-        showInfo("Restore Normal Sleep", "Lid Awake cannot control the current sleep setting. If no other tool should own it, run this in Terminal:\n\nsudo /usr/bin/pmset -a disablesleep 0")
+        let problem = recoveryIssue ?? helperProblem ?? "Lid Awake cannot control the current sleep setting."
+        showInfo("Restore Normal Sleep", "\(problem)\n\nIf no other tool should own this setting, run in Terminal:\n\nsudo /usr/bin/pmset -a disablesleep 0")
+    }
+
+    @objc private func repairHelper() {
+        guard !repairing && !active && observed == false else { return }
+        repairing = true
+        renderMenu()
+        helper.repair { [weak self] error in
+            guard let self else { return }
+            self.repairing = false
+            if let error { self.showError("Helper repair failed: \(error)") }
+            else if self.helper.status == .requiresApproval {
+                self.setupPending = true
+                self.helper.openApprovalSettings()
+                self.showInfo("Approve the Helper", "macOS needs approval for the updated helper in System Settings > General > Login Items & Extensions.")
+            }
+            self.refresh()
+        }
     }
 
     @objc private func toggleAutomaticChecks() {

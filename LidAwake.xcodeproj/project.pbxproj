@@ -17,6 +17,7 @@
 		3D78CA72C7C37B8A11D4F950 /* SessionPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B946F28CD242110F493A1059 /* SessionPolicyTests.swift */; };
 		42922D940E250BC2DAB129F0 /* HelperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20639ED5584BBEDF7D0A61CB /* HelperService.swift */; };
 		553435128E70349E8571A3AF /* PowerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4E8648D2E12B6C72CE4C7D /* PowerState.swift */; };
+		57D1586EA81EBA23B91A7280 /* PowerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BC82EF4FEDF8ACCEC257DBC /* PowerController.swift */; };
 		6357DC1B927FE5F4860B0874 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EE751A8030DD0167AC58B /* main.swift */; };
 		7B4B9CCD6A391A7F47AB1B0D /* SessionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD37BA4317931F0080C8891F /* SessionPolicy.swift */; };
 		9CFB047DD0800CA534AE70FA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E606CD5AB8E00ACCB20274C2 /* Assets.xcassets */; };
@@ -57,6 +58,7 @@
 		5552B5307DAC58D5EC5756DB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		61A8D0BC9F2CCD0B22628541 /* HelperClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperClient.swift; sourceTree = "<group>"; };
 		9B031285B9A97F7D22268BC6 /* LidAwakeHelper */ = {isa = PBXFileReference; includeInIndex = 0; path = LidAwakeHelper; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BC82EF4FEDF8ACCEC257DBC /* PowerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerController.swift; sourceTree = "<group>"; };
 		9BEE954F948041E03BC4FC3D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		B946F28CD242110F493A1059 /* SessionPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionPolicyTests.swift; sourceTree = "<group>"; };
 		BD8457D8D35F1EE4757FD30D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 			children = (
 				20639ED5584BBEDF7D0A61CB /* HelperService.swift */,
 				9BEE954F948041E03BC4FC3D /* main.swift */,
+				9BC82EF4FEDF8ACCEC257DBC /* PowerController.swift */,
 			);
 			name = Helper;
 			path = Sources/Helper;
@@ -311,6 +314,7 @@
 			files = (
 				2AF1DF02D7BC157D9E412EB3 /* HelperProtocol.swift in Sources */,
 				42922D940E250BC2DAB129F0 /* HelperService.swift in Sources */,
+				57D1586EA81EBA23B91A7280 /* PowerController.swift in Sources */,
 				553435128E70349E8571A3AF /* PowerState.swift in Sources */,
 				26DEB672CB67C1D1A5ADAC5D /* SessionPolicy.swift in Sources */,
 				17DC8BA3D1107E129A35E759 /* main.swift in Sources */,
@@ -345,12 +349,16 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
+				CURRENT_PROJECT_VERSION = 1000;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
+				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kzahel.lidawake.dev.helper;
 				PRODUCT_NAME = LidAwakeHelper;
 				SDKROOT = macosx;
@@ -540,12 +548,16 @@
 				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
+				CURRENT_PROJECT_VERSION = 1000;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleShortVersionString = "$(MARKETING_VERSION)";
+				INFOPLIST_KEY_CFBundleVersion = "$(CURRENT_PROJECT_VERSION)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kzahel.lidawake.helper;
 				PRODUCT_NAME = LidAwakeHelper;
 				SDKROOT = macosx;
