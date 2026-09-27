@@ -18,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        item.button?.image = NSImage(systemSymbolName: "laptopcomputer", accessibilityDescription: "Lid Awake off")
+        setStatusIcon()
         item.menu = menu
         menu.delegate = self
         refresh()
@@ -78,8 +78,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
             ProcessInfo.processInfo.endActivity(activity)
             self.activity = nil
         }
-        item.button?.image = NSImage(systemSymbolName: "laptopcomputer", accessibilityDescription: active ? "Lid Awake on" : "Lid Awake off")
-        item.button?.contentTintColor = observed == true ? .systemOrange : nil
+        setStatusIcon()
+        item.button?.contentTintColor = nil
+    }
+
+    private func setStatusIcon() {
+        let enabled = observed == true
+        let icon = NSImage(size: NSSize(width: 20, height: 20), flipped: false) { _ in
+            let badge = NSBezierPath(roundedRect: NSRect(x: 1, y: 1, width: 18, height: 18), xRadius: 4, yRadius: 4)
+            (enabled
+                ? NSColor(calibratedRed: 0.88, green: 0.36, blue: 0.05, alpha: 1)
+                : NSColor(calibratedWhite: 0.42, alpha: 1)).setFill()
+            badge.fill()
+
+            (enabled ? NSColor.black : NSColor.white).setStroke()
+            let screen = NSBezierPath(roundedRect: NSRect(x: 4.5, y: 7, width: 11, height: 8), xRadius: 1, yRadius: 1)
+            screen.lineWidth = 1.5
+            screen.stroke()
+            let base = NSBezierPath()
+            base.move(to: NSPoint(x: 3.8, y: 5.5))
+            base.line(to: NSPoint(x: 16.2, y: 5.5))
+            base.lineWidth = 1.6
+            base.lineCapStyle = .round
+            base.stroke()
+            return true
+        }
+        icon.isTemplate = false
+        icon.accessibilityDescription = active ? "Lid Awake on" : "Lid Awake off"
+        item.button?.image = icon
     }
 
     private func renderMenu() {
