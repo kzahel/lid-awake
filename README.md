@@ -1,6 +1,6 @@
 # Lid Awake
 
-Keep your MacBook running with the lid closed, from the menu bar. Choose a time limit, start a session, and turn it off when you are done. Lid Awake restores normal sleep automatically when the time runs out, the app stops responding, or the battery reaches 15%.
+Keep your MacBook running with the lid closed, from the menu bar. Choose a time limit, start a session, and turn it off when you are done. Lid Awake restores normal sleep when the time runs out, the app stops responding, the battery reaches 15%, or macOS reports serious heat.
 
 **macOS 13 or later · [Download a test release](https://github.com/kzahel/lid-awake/releases)**
 
@@ -14,6 +14,8 @@ Keep your MacBook running with the lid closed, from the menu bar. Choose a time 
 
 Choose **Duration** (30 minutes to 4 hours), then **Keep Awake**. The menu shows the time remaining. Its badge is gray when normal sleep is on and orange when sleep is disabled. Choose **Restore Normal Sleep** to end a session early.
 
+After an update, the menu may show **Helper needs repair**. Choose **Repair Helper…** while normal sleep is on. macOS may ask you to approve the updated helper again.
+
 Keep the Mac on a hard, ventilated surface while the lid is closed. Avoid putting it in an enclosed bag while it is running.
 
 ## Updates
@@ -24,7 +26,7 @@ Lid Awake checks for updates daily by default and lets you choose when to instal
 
 [Compare Lid Awake with Lidless and Awayke](COMPETITIVE-ANALYSIS.md) for size, helper security, recovery, safety features, updates, and testing. Lid Awake favors short sessions with a fixed end time and a small menu; Lidless offers more controls, while Awayke has a quicker toggle and more session modes. The comparison also lists what Lid Awake has not tested yet.
 
-The [roadmap](docs/ROADMAP.md) prioritizes reliable sleep restoration, helper security, and physical acceptance tests before adding more session modes.
+The [roadmap](docs/ROADMAP.md) tracks physical acceptance and the remaining reliability checks before adding more session modes.
 
 ## More information
 

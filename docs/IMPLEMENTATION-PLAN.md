@@ -1,6 +1,6 @@
 # Reliability release plan
 
-Target: the next signed `v0.0.x` prerelease. This plan implements the [roadmap](ROADMAP.md) work that can be developed and tested without a physical lid switch. The user will run the final closed-lid test on a MacBook after the prerelease is published.
+Shipped in signed prerelease [`v0.0.5`](https://github.com/kzahel/lid-awake/releases/tag/v0.0.5). This plan covers the [roadmap](ROADMAP.md) work that can be developed and tested without a physical lid switch. The user will run the final closed-lid test on a MacBook after publication. Results are in the [validation record](VALIDATION.md).
 
 ## Behavior to ship
 
@@ -15,7 +15,7 @@ Target: the next signed `v0.0.x` prerelease. This plan implements the [roadmap](
 - In a claimed machine-control Tart VM, the root helper integration harness verifies on/off, marker recovery, timeout, failed restoration retry, and observed read-back. The harness restores normal sleep and removes only its own test marker on exit.
 - In the VM, an unsigned or differently signed XPC client must fail to call the installed helper, while the signed app still succeeds. Record the exact observed result; the source-level signing check alone is insufficient evidence.
 - Install an older signed release, update through Sparkle to the new signed release, verify helper health and repair if required, then toggle on/off without a routine password prompt. Verify Gatekeeper, code signatures, notarization, and the update archive signature.
-- Publish the prerelease from GitHub Actions only after the local and VM checks pass. Record the release and remaining physical test in [validation](VALIDATION.md). The user then performs the physical lid-close, normal-sleep control, and screen-lock check in [the test plan](TESTING.md).
+- Publish the prerelease from GitHub Actions after local and direct VM checks. Record the release and remaining physical test in [validation](VALIDATION.md). The user then performs the physical lid-close, normal-sleep control, and screen-lock check in [the test plan](TESTING.md).
 
 ## Constraints
 

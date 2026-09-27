@@ -24,4 +24,4 @@ spctl -a -vvv -t exec '/Applications/Lid Awake.app'
 xcrun stapler validate '/Applications/Lid Awake.app'
 ```
 
-Sparkle replacement from 0.0.3 to 0.0.4 was tested in the VM with an approved helper; the helper toggled the sleep setting afterward. Scheduled daily update discovery has not been observed through a full interval. CI success alone does not establish the behavior of an installed update.
+Sparkle replacement from 0.0.4 to 0.0.5 was tested in the VM with a previously approved helper. The new app detected that the registered helper was stale, **Repair Helper…** registered the new helper, and the helper toggled the sleep setting afterward without a new password prompt in that VM. Scheduled daily update discovery has not been observed through a full interval. CI success alone does not establish the behavior of an installed update.
