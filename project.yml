@@ -103,7 +103,7 @@ targets:
     type: bundle.unit-test
     platform: macOS
     sources:
-      - Tests
+      - Tests/SessionPolicyTests.swift
       - Sources/Shared
     settings:
       base:
