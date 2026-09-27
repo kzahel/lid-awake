@@ -2,7 +2,6 @@ import AppKit
 import ServiceManagement
 import Sparkle
 
-@main
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpdaterDelegate {
     private let helper = HelperClient()
     private lazy var updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
