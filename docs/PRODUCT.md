@@ -1,4 +1,4 @@
-# Product and UX plan
+# Product behavior and UX
 
 ## Purpose
 
@@ -6,34 +6,36 @@ Keep local agents and other processes running while a MacBook is carried with it
 
 ## MVP behavior
 
-- Menu bar icon indicates **Off**, **On**, **Setting up**, or **Error**.
+- The menu bar shows a gray badge with a white laptop when normal sleep is enabled, and an orange badge with a black laptop when sleep is disabled. Setup and errors are explained in the menu or an alert.
 - The menu shows the observed macOS `SleepDisabled` state, session time remaining, and **Keep Awake** / **Restore Normal Sleep**.
 - The user chooses a duration before enabling: 30 minutes, 1 hour, 2 hours (default), or 4 hours. The privileged helper enforces the deadline independently of the UI.
-- If the app quits, crashes, or stops heartbeating, the helper restores normal sleep within 90 seconds. If the helper restarts while it owns an active override, it restores normal sleep immediately.
+- A normal quit restores sleep immediately. If the app crashes or stops heartbeating, the helper restores normal sleep after about 90 seconds. If the helper restarts while it owns an active override, it restores normal sleep immediately.
 - Turning off always restores normal sleep for an override owned by Lid Awake. If another program already disabled sleep, Lid Awake reports that state and refuses to take ownership.
 - If sleep is disabled while the helper is unavailable, the menu remains orange and offers a manual `sudo pmset -a disablesleep 0` recovery instruction.
-- First use presents a clear explanation, then **Set Up Helper**. The app registers its bundled daemon with `SMAppService`; if macOS requires approval, it shows **Open System Settings** and watches for the approved state. No sudo password is collected by the app.
+- First use presents a clear explanation, then **Set Up Helper…**. The app registers its bundled daemon with `SMAppService`; if macOS requires approval, it opens System Settings and watches for the approved state. No sudo password is collected by the app.
 - On battery, the helper restores normal sleep at 15% charge. The UI explains the cutoff before starting.
 - The menu has **Check for Updates…**. Sparkle checks daily by default and announces available updates. Installation is offered only when Lid Awake is off. Silent installation is disabled for MVP.
-- Optional **Launch at Login** setting uses `SMAppService.mainApp`.
+- Optional **Launch at Login** menu item uses `SMAppService.mainApp`.
 
 ## First-run flow
 
 1. Open the signed, notarized app from `/Applications`.
-2. Choose a duration and click **Keep Awake**.
-3. If the helper is not registered, show why the system-level helper is needed and a **Set Up Helper** button.
-4. After registration, handle `.requiresApproval` by opening System Settings > General > Login Items & Extensions. Show current approval state; enable the control only after `.enabled`.
-5. Once enabled, the menu icon and text change to **On** and show the deadline. The user can turn it off immediately.
+2. Choose **Set Up Helper…** from the menu (or choose **Keep Awake** to reach the same setup prompt).
+3. Confirm the setup explanation. If macOS requires approval, the app opens the Login Items section of System Settings and shows where to approve Lid Awake.
+4. After approval, choose a duration and **Keep Awake**. Confirm the ventilation warning.
+5. The menu shows the remaining time and the badge turns orange. The user can turn it off immediately.
 
 ## Safety and recovery
 
-Closed-lid operation in a bag can cause heat buildup and rapid battery drain. Show a concise warning on first activation to keep the computer ventilated. Bounded duration and low-battery cutoff are enforced by the root helper; the app cannot extend them merely by sending heartbeats. A helper-owned state marker is written before enabling sleep suppression, so a helper restart can recover an interrupted session. The helper accepts XPC requests only from the signed app with the exact bundle identifier and Apple team ID.
+Closed-lid operation in a bag can cause heat buildup and rapid battery drain. The app shows a ventilation warning before each session. Bounded duration and low-battery cutoff are enforced by the root helper; the app cannot extend them merely by sending heartbeats. A helper-owned state marker is written before enabling sleep suppression, so a helper restart can recover an interrupted session. The helper accepts XPC requests only from the signed app with the exact bundle identifier and Apple team ID.
 
 ## Distribution
 
 A Developer ID signed and Apple notarized DMG contains `Lid Awake.app` and an Applications shortcut. The user drags the app into Applications once. Sparkle updates the app from a signed update archive and appcast published with GitHub Releases. No package installer is needed for the bundled daemon.
 
-## Acceptance criteria
+## Acceptance and remaining checks
+
+The [validation record](VALIDATION.md) distinguishes completed checks from tests that still need a physical Mac or a stock test environment. In particular, the closed-lid remote session and app-driven restoration were observed separately; the timestamped heartbeat and normal-sleep lid-close control below remain to be run together.
 
 - First-run helper approval succeeds and subsequent toggles need no password.
 - On/off state is confirmed using I/O Registry `SleepDisabled`, including after app or helper failure.

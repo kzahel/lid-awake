@@ -72,12 +72,12 @@ GitHub says [standard hosted runners are free for public repositories](https://d
 - Downloaded the latest release asset of each, measured size, inspected bundle contents, and passed `codesign --verify --strict` plus `xcrun stapler validate` on both apps.
 - `swiftc -parse` passed for both sets of Swift sources. Awayke's checked-in pure Swift test runner compiled and passed all 25 checks.
 - Generated Lidless's Xcode project with `xcodegen`. `xcodebuild test -scheme Lidless-CI -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO -quiet` produced no test result after more than three minutes and was terminated. This is **not** a test pass or failure. The generated Xcode project is ignored, and the tracked plist changed by XcodeGen was restored.
-- No app was installed or run, no helper registered, no `pmset` write made, and no closed-lid test performed.
+- During this comparison, no competitor app was installed or run, no helper registered, no `pmset` write made, and no closed-lid test performed.
 
-## Recommendation for `lid-awake`
+## Decision and resulting implementation
 
-1. **Best reference to study or fork:** Lidless, for its signed client check, explicit state reconciliation, recovery watchdog, and tests. Fix the read path for this Mac and narrow the watchdog guarantee before relying on it during transit. It is larger than our target and carries Sparkle/updater and settings complexity we may not need.
-2. **Best minimal UI reference:** Awayke. Its binary and app code are smaller, and its timed/until-reopen sessions fit short trips. Add runtime XPC client authorization and independent recovery before adopting its privileged helper. Check its display assertion and screen-lock behavior on a real Mac.
-3. **If building our own:** keep the menu bar app small; use the current `ioreg` read path; install either a helper with a signed-client XPC requirement or a one-time `sudoers` rule limited to the exact two `pmset` argument lists. In the `sudoers` case, change our script to elevate only `pmset`, because it currently reruns the whole script under `sudo`. Add a timer, low-battery cutoff, an explicit lock-on-close option, read-back verification, and a recovery path independent of the UI process. Keep sleep ownership explicit when other tools may use the same global flag.
+1. **Best security and recovery reference:** Lidless, for its signed client check, state reconciliation, recovery watchdog, and tests. Its `pmset -g` read path did not report the off state on this Mac.
+2. **Best minimal UI reference:** Awayke. Its timed sessions fit short trips, but its root helper needs runtime XPC client authorization and independent recovery before reuse.
+3. **Our choice:** We built a small native menu bar app. The current [architecture](docs/IMPLEMENTATION.md) uses I/O Registry for observed state, a signed-client privileged helper, bounded sessions, a battery cutoff, and a recovery marker. It does not include a lock-on-close option; that remains a possible future feature. The original [shell script](lid-awake) remains available.
 
 Because the intended use includes **transit**, an awake closed Mac should not go into an enclosed bag. None of the software guards can guarantee safe cooling under a heavy local agent workload.

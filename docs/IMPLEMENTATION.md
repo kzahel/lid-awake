@@ -1,4 +1,4 @@
-# Implementation plan
+# Architecture and safety
 
 ## Components
 
@@ -11,18 +11,12 @@
 
 `Off -> Setup -> Ready -> On -> Off`. Setup approval can remain pending; the UI polls `SMAppService.status`. Before `On`, the helper checks the observed `SleepDisabled` state, creates an ownership marker, then runs `pmset`. A successful `Off` runs `pmset` and clears the marker. A watchdog restores on deadline, lost heartbeat, or low battery. On daemon startup, any marker is treated as an interrupted session and immediately restored. External `SleepDisabled=Yes` without an ownership marker is shown as externally managed and cannot be enabled by this app.
 
-## Build and test sequence
+## Build and verification
 
-1. Generate an Xcode project with XcodeGen. Keep Debug and Release bundle IDs and daemon labels separate.
-2. Compile app and daemon; run focused pure-logic tests for session expiration and state parsing.
-3. Test read-only state, setup approval, XPC identity rejection, on/off, app quit, daemon restart, and timer in a claimed Tart test VM via `machine-control`.
-4. Build and sign locally with the Developer ID keychain identity. Validate nested signatures and hardened runtime.
-5. Run notarization and stapling on an actual archive. Validate with `spctl` and `stapler`.
-6. Upload CI secrets without ever printing them or placing private material in the repository. Run a draft release, verify the signed artifacts, then publish the first release.
-7. Test a real signed old-to-new Sparkle update and the physical lid-close behavior.
+`project.yml` describes the XcodeGen project; the generated Xcode project is checked in. Debug and Release use separate bundle IDs and daemon labels. GitHub Actions builds and tests pushes, then signs, notarizes, staples, and publishes tagged releases as described in [release operations](RELEASE.md).
 
-Tart and `machine-control` provide no virtual lid switch. The OS-specific clamshell event needs the final physical MacBook test; automated tests cover all other transitions.
+The [test plan](TESTING.md) and [validation record](VALIDATION.md) separate verified behavior from remaining checks. Signed installation, helper approval, on/off, quit and forced-exit recovery, and Sparkle replacement have been exercised in a Tart VM. A physical MacBook stayed reachable during a closed-lid session. The VM cannot emulate a lid switch, and XPC client rejection has not been tested with a deliberately mismatched signed client.
 
 ## Threat model
 
-The XPC Mach service is reachable by local processes. Restrict its clients to the exact app identifier and signing team, using the audit-token-backed code signing requirement before `resume()`. Treat daemon input as untrusted: reject durations outside the fixed range, serialize state changes, use fixed absolute tool paths, avoid shell execution, keep private keys out of the app and repository, and prevent update installation during an active session. A user or another root tool can still change the global power setting independently; the UI must display observed state and avoid taking ownership of it.
+The XPC Mach service is reachable by local processes. The helper sets a code signing requirement for the exact app identifier and signing team before `resume()`. It rejects durations outside the fixed range, serializes state changes, uses fixed absolute tool paths, and avoids shell execution. Private keys stay outside the app and repository, and update installation is blocked during an active session. A user or another root tool can still change the global power setting independently; the UI displays observed state and avoids taking ownership of it.

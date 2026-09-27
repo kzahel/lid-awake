@@ -2,8 +2,8 @@
 
 ## Helper setup and state
 
-On a disposable Tart Mac VM, the privileged helper's power-setting logic can
-also be checked without changing Login Items consent. Stage this repository
+On a disposable Tart Mac VM with passwordless `sudo` configured, the privileged
+helper's power-setting logic can be checked without changing Login Items consent. Stage this repository
 inside the guest's read-only share and run
 `sudo -n bash scripts/test-helper-in-vm.sh` from that staged copy. The script
 requires a `VirtualMac` model and root, verifies on/off, marker recovery
@@ -12,7 +12,7 @@ normal sleep from an exit trap. This
 exercises the helper logic directly; the signed app's XPC connection and
 one-time macOS approval still require the UI test below.
 
-Use a signed, notarized app copied to `/Applications`. On first launch, choose **Keep Awake**, then **Set Up Helper**. Approve the background daemon in System Settings. Confirm that later on/off toggles do not request a sudo password. After each toggle, compare the menu with:
+Use a signed, notarized app copied to `/Applications`. On first launch, choose **Keep Awake**, then **Set Up Helper** in the prompt. Approve the background daemon in System Settings. Confirm that later on/off toggles do not request a sudo password. After each toggle, compare the menu with:
 
 ```sh
 /usr/sbin/ioreg -r -c IOPMrootDomain -d 1 -l | /usr/bin/sed -n 's/.*"SleepDisabled" = //p'

@@ -1,11 +1,31 @@
 # Lid Awake
 
-A small macOS menu bar app for keeping a MacBook running with its lid closed during a bounded session. It uses a signed, bundled privileged helper to change `pmset -a disablesleep`, so routine toggles do not require a sudo password.
+Keep your MacBook running with the lid closed, from the menu bar. Choose a time limit, start a session, and turn it off when you are done. Lid Awake restores normal sleep automatically when the time runs out, the app stops responding, or the battery reaches 15%.
 
-**Status:** prerelease. GitHub Actions signs and notarizes [v0.0.4](https://github.com/kzahel/lid-awake/releases/tag/v0.0.4). VM tests passed installation, Sparkle updates, one-time helper approval, on/off toggling without repeated password prompts, quit restoration, and forced-exit watchdog restoration. Version 0.0.4 fixes the icon disappearing against a black menu bar; both icon states and on/off toggling were verified on a physical Mac. That Mac also remained reachable through a remote agent session with its lid closed using version 0.0.3. The original command-line script remains at [`lid-awake`](lid-awake).
+**macOS 13 or later · [Download a test release](https://github.com/kzahel/lid-awake/releases)**
 
-To try the test build, download the `v0.0.4` DMG from the release, drag **Lid Awake.app** to **Applications**, and open it. Choose **Set Up Helper…** from its menu bar icon and approve Lid Awake under **System Settings → General → Login Items & Extensions**. Existing users can choose **Check for Updates…** when an awake session is off.
+## Install
 
-See [the product and UX plan](docs/PRODUCT.md), [the architecture and safety plan](docs/IMPLEMENTATION.md), [release operations](docs/RELEASE.md), [end-to-end testing](docs/TESTING.md), and [current validation](docs/VALIDATION.md). The [competitive analysis](COMPETITIVE-ANALYSIS.md) covers Lidless and Awayke.
+1. Download the newest prerelease DMG, open it, and drag **Lid Awake.app** to **Applications**.
+2. Open the app and click its laptop icon near the clock.
+3. Choose **Set Up Helper…**. If macOS asks for approval, follow the prompt to **System Settings → General → Login Items** (called **Login Items & Extensions** on newer macOS versions). You may need to enter an administrator password once. Later sessions do not ask for it again.
 
-MIT licensed.
+## Use
+
+Choose **Duration** (30 minutes to 4 hours), then **Keep Awake**. The menu shows the time remaining. Its badge is gray when normal sleep is on and orange when sleep is disabled. Choose **Restore Normal Sleep** to end a session early.
+
+Keep the Mac on a hard, ventilated surface while the lid is closed. Avoid putting it in an enclosed bag while it is running.
+
+## Updates
+
+Lid Awake checks for updates daily by default and lets you choose when to install them. You can also choose **Check for Updates…** in the menu when no session is active. The current release is a prerelease; [test results and remaining checks](docs/VALIDATION.md) are recorded separately.
+
+## More information
+
+- [How it works and its safety limits](docs/IMPLEMENTATION.md)
+- [Product behavior and first-run flow](docs/PRODUCT.md)
+- [Testing](docs/TESTING.md) and [release process](docs/RELEASE.md)
+- [Lidless and Awayke comparison](COMPETITIVE-ANALYSIS.md)
+- [Original command-line script](lid-awake)
+
+[MIT licensed](LICENSE).
