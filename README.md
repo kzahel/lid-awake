@@ -20,12 +20,15 @@ Keep the Mac on a hard, ventilated surface while the lid is closed. Avoid puttin
 
 Lid Awake checks for updates daily by default and lets you choose when to install them. You can also choose **Check for Updates…** in the menu when no session is active. The current release is a prerelease; [test results and remaining checks](docs/VALIDATION.md) are recorded separately.
 
+## How it compares
+
+[Compare Lid Awake with Lidless and Awayke](COMPETITIVE-ANALYSIS.md) for size, helper security, recovery, safety features, updates, and testing. Lid Awake favors short sessions with a fixed end time and a small menu; Lidless offers more controls, while Awayke has a quicker toggle and more session modes. The comparison also lists what Lid Awake has not tested yet.
+
 ## More information
 
 - [How it works and its safety limits](docs/IMPLEMENTATION.md)
 - [Product behavior and first-run flow](docs/PRODUCT.md)
 - [Testing](docs/TESTING.md) and [release process](docs/RELEASE.md)
-- [Lidless and Awayke comparison](COMPETITIVE-ANALYSIS.md)
 - [Original command-line script](lid-awake)
 
 [MIT licensed](LICENSE).
