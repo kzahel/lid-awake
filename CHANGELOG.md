@@ -2,6 +2,10 @@
 
 Notable changes to Lid Awake are listed by release version.
 
+## [0.0.8]
+
+- Wrap the German heat-safety label inside the Settings window.
+
 ## [0.0.7]
 
 - Add Until I turn it off, Until unplugged, and 15-minute through 4-hour sessions. Choose whether to keep the Mac awake only with the lid open or even when it closes.

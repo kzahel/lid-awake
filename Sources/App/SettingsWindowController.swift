@@ -46,7 +46,7 @@ final class SettingsWindowController: NSWindowController {
         explanation.textColor = .secondaryLabelColor
         root.addArrangedSubview(explanation)
 
-        let heat = NSTextField(labelWithString: tr("High heat: stop at serious or critical thermal state"))
+        let heat = NSTextField(wrappingLabelWithString: tr("High heat: stop at serious or critical thermal state"))
         root.addArrangedSubview(heat)
         let heatDetail = NSTextField(wrappingLabelWithString:
             tr("The heat safeguard stays on for every session, including while charging."))
@@ -55,6 +55,7 @@ final class SettingsWindowController: NSWindowController {
 
         NSLayoutConstraint.activate([
             explanation.widthAnchor.constraint(equalToConstant: 380),
+            heat.widthAnchor.constraint(equalToConstant: 380),
             heatDetail.widthAnchor.constraint(equalToConstant: 380)
         ])
     }
