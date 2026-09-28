@@ -2,6 +2,8 @@
 
 ## Current result
 
+2026-09-28 candidate for 0.0.7: the local macOS 26.6.2 Xcode test suite passed all six policy/parser tests, and the pushed source build passed GitHub Actions [run 36416778961](https://github.com/kzahel/lid-awake/actions/runs/36416778961). In the claimed macOS Tart VM, the root helper harness passed actual `SleepDisabled` on/off, fresh-process recovery, the lost-heartbeat watchdog, failed-readback retry, and the new unplugged and open-lid-only modes. I/O Registry reported `SleepDisabled = No` at the end; the harness marker was absent. This directly tests helper behavior, not yet the signed 0.0.7 app's menu, XPC approval, or physical lid behavior.
+
 Version [0.0.5](https://github.com/kzahel/lid-awake/releases/tag/v0.0.5) is a signed and notarized prerelease. A real 0.0.4-to-0.0.5 Sparkle update passed in the machine-control Tart VM, including detection and repair of a stale registered helper. The installed build 5 app and helper passed on/off, forced app exit, helper restart, and unsigned XPC client rejection checks. On a physical Mac, version 0.0.3 sustained a roughly one-hour closed-lid remote session; version 0.0.4's icon remained visible against a black menu bar and its on/off controls changed the observed sleep state. The physical timestamped-heartbeat and normal-sleep lid-close control on version 0.0.5 in [the test plan](TESTING.md) remain open. The Tart VM has SIP disabled, so it does not replace a stock SIP-enabled acceptance test.
 
 ## Detailed record

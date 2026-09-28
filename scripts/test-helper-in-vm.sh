@@ -11,9 +11,10 @@ state="$(/usr/sbin/ioreg -r -c IOPMrootDomain -d 1 -l | /usr/bin/awk -F'= ' '/"S
 test_dir="$(/usr/bin/mktemp -d /tmp/lid-awake-helper-test.XXXXXX)"
 binary="$test_dir/helper-test"
 marker='/Library/Application Support/LidAwake/com.kzahel.lidawake.helper.integration.session'
+last_stop='/Library/Application Support/LidAwake/com.kzahel.lidawake.helper.integration.last-stop'
 cleanup() {
   /usr/bin/pmset -a disablesleep 0
-  /bin/rm -f "$marker" "$binary"
+  /bin/rm -f "$marker" "$last_stop" "$binary"
   /bin/rmdir "$test_dir"
 }
 trap cleanup EXIT
