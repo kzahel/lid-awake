@@ -10,6 +10,8 @@ The release job uses a Developer ID Application certificate, an App Store Connec
 - Before a stable release, validate the signed app on a stock macOS test environment, including Gatekeeper and helper approval, and complete the remaining [physical lid checks](VALIDATION.md). `v0.0.x` tags are prerelease test artifacts for exercising CI, installation, and Sparkle while acceptance work continues.
 - `v*` tag: require all signing and notarization secrets; build with hardened runtime, run tests, verify signatures, notarize, staple, create DMG and Sparkle update ZIP, sign the update archive, stage a draft GitHub Release, then publish it and the appcast after those checks pass.
 
+The release job installs `dmgbuild==1.6.7` in a Python virtual environment. Its layout is in [`scripts/dmg-settings.py`](../scripts/dmg-settings.py), with the editable background in [`Resources/dmg-background.svg`](../Resources/dmg-background.svg) and its rendered PNG beside it. If the background changes, regenerate the PNG with `sips -s format png Resources/dmg-background.svg --out Resources/dmg-background.png` before packaging.
+
 The appcast is served at a stable HTTPS URL from the default branch through `raw.githubusercontent.com`. CI publishes it only after the GitHub Release is public; archives remain GitHub Release assets. The updater public key is embedded in the app. A published version must never be replaced in place.
 
 Tags use `vMAJOR.MINOR.PATCH`; CI maps them to monotonic Sparkle build numbers (`major * 1,000,000 + minor * 1,000 + patch`).

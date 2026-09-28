@@ -35,11 +35,10 @@ spctl --assess --type execute --verbose=2 "$app"
 update_zip="$artifacts/appcast-input/LidAwake-$RELEASE_TAG.zip"
 ditto -c -k --keepParent "$app" "$update_zip"
 
-staging="$(mktemp -d "$artifacts/dmg-staging.XXXXXX")"
-ditto "$app" "$staging/Lid Awake.app"
-ln -s /Applications "$staging/Applications"
 dmg="$artifacts/LidAwake-$RELEASE_TAG.dmg"
-hdiutil create -quiet -volname "Lid Awake" -srcfolder "$staging" -ov -format UDZO "$dmg"
+dmgbuild -s scripts/dmg-settings.py \
+  -D "app=$app" -D "background=$repo_dir/Resources/dmg-background.png" \
+  "Lid Awake" "$dmg"
 codesign --force --sign 'Developer ID Application: Kyle Graehl (VD7BYQ6ABM)' "$dmg"
 xcrun notarytool submit "$dmg" --key "$ASC_API_KEY_FILE" \
   --key-id "$ASC_API_KEY_ID" --issuer "$ASC_API_ISSUER_ID" --wait
