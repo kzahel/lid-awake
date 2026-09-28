@@ -2,6 +2,10 @@
 
 Notable changes to Lid Awake are listed by release version.
 
+## [0.0.11]
+
+- Add a Don't show this again checkbox to the Keep Awake confirmation. Settings → Safety can turn the confirmation back on.
+
 ## [0.0.10]
 
 - Put Quit Lid Awake back in the main menu, below Settings.

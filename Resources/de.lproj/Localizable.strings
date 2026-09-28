@@ -9,6 +9,9 @@
 "Could not remove diagnostic state." = "Diagnosedaten konnten nicht entfernt werden.";
 "Could not restore normal sleep." = "Der normale Ruhezustand konnte nicht wiederhergestellt werden.";
 "Could not restore sleep." = "Der Ruhezustand konnte nicht wiederhergestellt werden.";
+"Don't show this again" = "Diesen Hinweis nicht mehr anzeigen";
+"Don't show start confirmation" = "Startbestätigung nicht anzeigen";
+"Confirmation" = "Bestätigung";
 "Could not unregister the helper: %@" = "Der Hilfsdienst konnte nicht abgemeldet werden: %@";
 "Unsupported session mode." = "Nicht unterstützter Sitzungsmodus.";
 "Unsupported session settings." = "Nicht unterstützte Sitzungseinstellungen.";

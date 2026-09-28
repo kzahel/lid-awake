@@ -4,6 +4,7 @@ enum SettingsAction {
     case checkForUpdates
     case toggleAutomaticChecks
     case toggleLaunchAtLogin
+    case toggleSkipStartConfirmation
     case reportProblem
     case sendFeedback
     case uninstall
@@ -13,6 +14,7 @@ final class SettingsWindowController: NSWindowController {
     private let batteryPicker = NSPopUpButton(frame: .zero, pullsDown: false)
     private let automaticChecks = NSButton(checkboxWithTitle: tr("Automatically Check for Updates"), target: nil, action: nil)
     private let launchAtLogin = NSButton(checkboxWithTitle: tr("Launch at Login"), target: nil, action: nil)
+    private let skipStartConfirmation = NSButton(checkboxWithTitle: tr("Don't show start confirmation"), target: nil, action: nil)
     private let checkUpdates = NSButton(title: tr("Check for Updates…"), target: nil, action: nil)
     private let onBatteryChange: (Int) -> Void
     private let onAction: (SettingsAction) -> Void
@@ -58,7 +60,10 @@ final class SettingsWindowController: NSWindowController {
         let heat = wrappingLabel(tr("High heat: stop at serious or critical thermal state"))
         let heatDetail = wrappingLabel(tr("The heat safeguard stays on for every session, including while charging."))
         heatDetail.textColor = .secondaryLabelColor
-        return makeTab(tr("Safety"), views: [heading(tr("Safety")), row, explanation, heat, heatDetail])
+        skipStartConfirmation.target = self
+        skipStartConfirmation.action = #selector(skipStartConfirmationChanged)
+        return makeTab(tr("Safety"), views: [heading(tr("Safety")), row, explanation, heat, heatDetail,
+                                             heading(tr("Confirmation")), skipStartConfirmation])
     }
 
     private func makeGeneralTab() -> NSTabViewItem {
@@ -124,9 +129,11 @@ final class SettingsWindowController: NSWindowController {
         return button
     }
 
-    func updateControls(automaticChecks: Bool, launchAtLogin: Bool, canCheckForUpdates: Bool) {
+    func updateControls(automaticChecks: Bool, launchAtLogin: Bool,
+                        skipStartConfirmation: Bool, canCheckForUpdates: Bool) {
         self.automaticChecks.state = automaticChecks ? .on : .off
         self.launchAtLogin.state = launchAtLogin ? .on : .off
+        self.skipStartConfirmation.state = skipStartConfirmation ? .on : .off
         checkUpdates.isEnabled = canCheckForUpdates
     }
 
@@ -139,6 +146,7 @@ final class SettingsWindowController: NSWindowController {
     @objc private func batteryChanged() { onBatteryChange(batteryPicker.selectedItem?.tag ?? 15) }
     @objc private func automaticChecksChanged() { onAction(.toggleAutomaticChecks) }
     @objc private func launchAtLoginChanged() { onAction(.toggleLaunchAtLogin) }
+    @objc private func skipStartConfirmationChanged() { onAction(.toggleSkipStartConfirmation) }
     @objc private func checkForUpdates() { onAction(.checkForUpdates) }
     @objc private func reportProblem() { onAction(.reportProblem) }
     @objc private func sendFeedback() { onAction(.sendFeedback) }

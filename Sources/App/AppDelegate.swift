@@ -18,6 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     private var chosenMode = SessionMode(rawValue: UserDefaults.standard.integer(forKey: "sessionMode")) ?? .timed
     private var allowClosedLid = UserDefaults.standard.object(forKey: "allowClosedLid") as? Bool ?? true
     private var batteryCutoff = UserDefaults.standard.object(forKey: "batteryCutoff") as? Int ?? 15
+    private var skipStartConfirmation = UserDefaults.standard.bool(forKey: "skipStartConfirmation")
     private var sessionDetails: SessionDetails?
     private var powerSource: PowerSource = .unknown
     private var lastShownStopReason: StopReason?
@@ -386,28 +387,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     }
 
     private func confirmAwake() {
-        let alert = NSAlert()
-        alert.messageText = tr(allowClosedLid ? "Keep running even with the lid closed?" : "Keep the Mac awake while the lid is open?")
-        let durationText: String
-        switch chosenMode {
-        case .timed: durationText = trf("after %@", durationLabel(chosenMinutes))
-        case .untilStopped: durationText = tr("when you turn it off")
-        case .untilUnplugged: durationText = tr("when you unplug the charger")
-        }
-        let batteryText: String
-        if chosenMode == .untilUnplugged {
-            batteryText = tr("Unplugging ends the session before the battery cutoff applies.")
-        } else {
-            batteryText = batteryCutoff == 0 ? tr("The app's battery cutoff is off.") : trf("On battery, it stops at %d%%.", batteryCutoff)
-        }
-        alert.informativeText = trf("The session ends %@, on serious heat, or if the app stops responding. %@ Keep the Mac ventilated while it runs.", durationText, batteryText)
-        alert.addButton(withTitle: tr("Keep Awake"))
-        alert.addButton(withTitle: tr("Cancel"))
-        NSApp.activate(ignoringOtherApps: true)
-        guard alert.runModal() == .alertFirstButtonReturn else {
-            busy = false
-            renderMenu()
-            return
+        if !skipStartConfirmation {
+            let alert = NSAlert()
+            alert.messageText = tr(allowClosedLid ? "Keep running even with the lid closed?" : "Keep the Mac awake while the lid is open?")
+            let durationText: String
+            switch chosenMode {
+            case .timed: durationText = trf("after %@", durationLabel(chosenMinutes))
+            case .untilStopped: durationText = tr("when you turn it off")
+            case .untilUnplugged: durationText = tr("when you unplug the charger")
+            }
+            let batteryText: String
+            if chosenMode == .untilUnplugged {
+                batteryText = tr("Unplugging ends the session before the battery cutoff applies.")
+            } else {
+                batteryText = batteryCutoff == 0 ? tr("The app's battery cutoff is off.") : trf("On battery, it stops at %d%%.", batteryCutoff)
+            }
+            alert.informativeText = trf("The session ends %@, on serious heat, or if the app stops responding. %@ Keep the Mac ventilated while it runs.", durationText, batteryText)
+            alert.addButton(withTitle: tr("Keep Awake"))
+            alert.addButton(withTitle: tr("Cancel"))
+            alert.showsSuppressionButton = true
+            alert.suppressionButton?.title = tr("Don't show this again")
+            NSApp.activate(ignoringOtherApps: true)
+            guard alert.runModal() == .alertFirstButtonReturn else {
+                busy = false
+                renderMenu()
+                return
+            }
+            if alert.suppressionButton?.state == .on {
+                skipStartConfirmation = true
+                UserDefaults.standard.set(true, forKey: "skipStartConfirmation")
+                updateSettingsControls()
+            }
         }
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert]) { _, _ in }
         let configuration = SessionConfiguration(mode: chosenMode,
@@ -514,6 +524,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
                     case .checkForUpdates: self.checkForUpdates()
                     case .toggleAutomaticChecks: self.toggleAutomaticChecks()
                     case .toggleLaunchAtLogin: self.toggleLaunchAtLogin()
+                    case .toggleSkipStartConfirmation:
+                        self.skipStartConfirmation.toggle()
+                        UserDefaults.standard.set(self.skipStartConfirmation, forKey: "skipStartConfirmation")
+                        self.updateSettingsControls()
                     case .reportProblem: self.reportProblem()
                     case .sendFeedback: self.sendFeedback()
                     case .uninstall: self.uninstall()
@@ -528,6 +542,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
         settingsWindow?.updateControls(
             automaticChecks: updater.updater.automaticallyChecksForUpdates,
             launchAtLogin: SMAppService.mainApp.status == .enabled,
+            skipStartConfirmation: skipStartConfirmation,
             canCheckForUpdates: !active && observed == false && !repairing && updater.updater.canCheckForUpdates)
     }
 

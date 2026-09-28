@@ -16,7 +16,7 @@ The compact menu shows the power source, active condition, countdown when timed,
 
 ## Safety and recovery
 
-**Settings… → Safety** offers a battery cutoff of Off, 15%, 20%, or 30%. It affects sessions that continue on battery. The privileged helper always stops for serious or critical macOS thermal state, 30 seconds without a readable power source, or a lost app heartbeat. It refuses to start when the power source or sleep state cannot be read or macOS reports serious heat. Keep a running Mac ventilated, especially with the lid closed.
+**Settings… → Safety** offers a battery cutoff of Off, 15%, 20%, or 30%. It affects sessions that continue on battery. The Keep Awake confirmation has a **Don't show this again** checkbox. Safety's **Don't show start confirmation** checkbox reflects that choice; uncheck it to restore the prompt. The privileged helper always stops for serious or critical macOS thermal state, 30 seconds without a readable power source, or a lost app heartbeat. It refuses to start when the power source or sleep state cannot be read or macOS reports serious heat. Keep a running Mac ventilated, especially with the lid closed.
 
 Closed-lid sessions create a root-owned marker before changing the global `SleepDisabled` flag. The helper clears it only after observing normal sleep. On restart it restores any interrupted closed-lid session. Failed restoration remains visible and retries. An external sleep override is displayed separately; Lid Awake does not claim it. Lid-open-only sessions use a macOS idle-sleep activity and leave the global flag alone.
 
