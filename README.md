@@ -14,7 +14,7 @@ Keep your MacBook awake from the menu bar, including when you close the lid. Run
 
 Choose **Keep Mac awake → Lid open only** for ordinary idle sleep prevention, or **Even when closed** to keep working after the lid closes. Choose **Stop when → Until I turn it off**, **Until unplugged** (available while charging), or **After a time limit**. Timed sessions can run for 15 minutes to 4 hours. Then choose **Start Keeping Awake** and confirm the ventilation warning. These choices start keeping the Mac awake immediately; they do not wait for a lid event. **Restore Normal Sleep** ends a session.
 
-**Settings…** offers a battery cutoff of Off, 15%, 20%, or 30%. It applies to sessions that can run on battery. The helper always stops for serious or critical thermal state and for sustained unreadable power. The menu shows the power source, active condition, and last stop reason. Its icon adds a battery cue while active on battery and an attention cue for helper repair or recovery. **Report a Problem…** lets you review and edit diagnostics before opening a GitHub issue; **Send Feedback…** opens a blank issue. **Uninstall…** restores and verifies normal sleep before removing the helper and login item.
+**Settings…** has Safety, General, and Support tabs. Safety offers a battery cutoff of Off, 15%, 20%, or 30%. It applies to sessions that can run on battery. The helper always stops for serious or critical thermal state and for sustained unreadable power. General contains update checks, launch at login, and Quit. Support contains problem reporting, feedback, and uninstall. **Report a Problem…** lets you review and edit diagnostics before opening a GitHub issue; **Uninstall…** restores and verifies normal sleep before removing the helper and login item. The compact menu shows the power source, active condition, and last stop reason. Its icon adds a battery cue while active on battery and an attention cue for helper repair or recovery.
 
 After an update, the menu may show **Helper needs repair**. Choose **Repair Helper…** while normal sleep is on. macOS may ask you to approve the updated helper again.
 
@@ -24,7 +24,7 @@ Keep the Mac on a hard, ventilated surface while the lid is closed. Avoid puttin
 
 ## Updates
 
-Lid Awake checks for updates daily by default and lets you choose when to install them. You can also choose **Check for Updates…** in the menu when no session is active. The current release is a prerelease; [test results and remaining checks](docs/VALIDATION.md) are recorded separately.
+Lid Awake checks for updates daily by default and lets you choose when to install them. You can also choose **Settings… → General → Check for Updates…** when no session is active. The current release is a prerelease; [test results and remaining checks](docs/VALIDATION.md) are recorded separately.
 
 ## How it compares
 

@@ -34,6 +34,12 @@
 "Keep running even with the lid closed?" = "Auch bei geschlossenem Deckel weiterlaufen lassen?";
 "Keep the Mac awake while the lid is open?" = "Mac bei geöffnetem Deckel wach halten?";
 "Launch at Login" = "Bei Anmeldung starten";
+"General" = "Allgemein";
+"Updates" = "Updates";
+"Startup" = "Startverhalten";
+"Application" = "Anwendung";
+"Support" = "Support";
+"Removal" = "Entfernen";
 "Last stop · %@" = "Letztes Ende · %@";
 "Lid Awake Error" = "Lid Awake-Fehler";
 "Lid Awake Settings" = "Lid Awake-Einstellungen";

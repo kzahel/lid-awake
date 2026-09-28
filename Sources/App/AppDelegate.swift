@@ -292,40 +292,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
             menu.addItem(recovery)
         }
         menu.addItem(.separator())
-
-        let safety = NSMenuItem(title: trf("Safety · battery cutoff %@ · stop on serious heat", batteryCutoff == 0 ? tr("Off") : "\(batteryCutoff)%"), action: nil, keyEquivalent: "")
-        safety.isEnabled = false
-        menu.addItem(safety)
         let settings = NSMenuItem(title: tr("Settings…"), action: #selector(showSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
-        let report = NSMenuItem(title: tr("Report a Problem…"), action: #selector(reportProblem), keyEquivalent: "")
-        report.target = self
-        menu.addItem(report)
-        let feedback = NSMenuItem(title: tr("Send Feedback…"), action: #selector(sendFeedback), keyEquivalent: "")
-        feedback.target = self
-        menu.addItem(feedback)
-        let uninstall = NSMenuItem(title: tr("Uninstall…"), action: #selector(uninstall), keyEquivalent: "")
-        uninstall.target = self
-        menu.addItem(uninstall)
-        menu.addItem(.separator())
-
-        let update = NSMenuItem(title: tr("Check for Updates…"), action: #selector(checkForUpdates), keyEquivalent: "")
-        update.target = self
-        update.isEnabled = !active && observed == false && !repairing && updater.updater.canCheckForUpdates
-        menu.addItem(update)
-        let checks = NSMenuItem(title: tr("Automatically Check for Updates"), action: #selector(toggleAutomaticChecks), keyEquivalent: "")
-        checks.target = self
-        checks.state = updater.updater.automaticallyChecksForUpdates ? .on : .off
-        menu.addItem(checks)
-        let login = NSMenuItem(title: tr("Launch at Login"), action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
-        login.target = self
-        login.state = SMAppService.mainApp.status == .enabled ? .on : .off
-        menu.addItem(login)
-        menu.addItem(.separator())
-        let quit = NSMenuItem(title: tr("Quit Lid Awake"), action: #selector(quit), keyEquivalent: "q")
-        quit.target = self
-        menu.addItem(quit)
+        updateSettingsControls()
     }
 
     @objc private func selectDuration(_ sender: NSMenuItem) {
@@ -526,14 +496,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
 
     @objc private func showSettings() {
         if settingsWindow == nil {
-            settingsWindow = SettingsWindowController(batteryCutoff: batteryCutoff) { [weak self] cutoff in
-                guard let self else { return }
-                self.batteryCutoff = cutoff
-                UserDefaults.standard.set(cutoff, forKey: "batteryCutoff")
-                self.renderMenu()
-            }
+            settingsWindow = SettingsWindowController(
+                batteryCutoff: batteryCutoff,
+                onBatteryChange: { [weak self] cutoff in
+                    guard let self else { return }
+                    self.batteryCutoff = cutoff
+                    UserDefaults.standard.set(cutoff, forKey: "batteryCutoff")
+                    self.renderMenu()
+                },
+                onAction: { [weak self] action in
+                    guard let self else { return }
+                    switch action {
+                    case .checkForUpdates: self.checkForUpdates()
+                    case .toggleAutomaticChecks: self.toggleAutomaticChecks()
+                    case .toggleLaunchAtLogin: self.toggleLaunchAtLogin()
+                    case .reportProblem: self.reportProblem()
+                    case .sendFeedback: self.sendFeedback()
+                    case .uninstall: self.uninstall()
+                    case .quit: self.quit()
+                    }
+                })
         }
+        updateSettingsControls()
         settingsWindow?.present()
+    }
+
+    private func updateSettingsControls() {
+        settingsWindow?.updateControls(
+            automaticChecks: updater.updater.automaticallyChecksForUpdates,
+            launchAtLogin: SMAppService.mainApp.status == .enabled,
+            canCheckForUpdates: !active && observed == false && !repairing && updater.updater.canCheckForUpdates)
     }
 
     private func maybeNotifyStop(_ reason: StopReason?) {

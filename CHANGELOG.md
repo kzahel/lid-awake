@@ -2,6 +2,10 @@
 
 Notable changes to Lid Awake are listed by release version.
 
+## [0.0.9]
+
+- Keep the menu focused on awake sessions and helper status. Move updates, launch at login, problem reports, feedback, uninstall, and quit into General and Support tabs in Settings.
+
 ## [0.0.8]
 
 - Wrap the German heat-safety label inside the Settings window.
