@@ -48,4 +48,13 @@ Enable Lid Awake, close the lid for 90 seconds, reopen it, and stop the heartbea
 
 ## Update test
 
+In a claimed macOS VM, also test the manual check without installing anything:
+
+- With the latest release and normal sleep, open **Settings… → General → Check for Updates…**. Expect Sparkle's **You're up to date!** dialog, then the same result beneath the button after dismissal. Check again to confirm it remains usable.
+- With an older build, expect the available version both in Sparkle's window and beneath the button. Check again while that window is open; it should focus the offer without leaving Settings at **Checking for updates…**. Dismiss the offer without installing.
+- With sleep disabled, expect a disabled button and a visible instruction to restore normal sleep. Restore sleep and confirm the button becomes enabled again. Also check helper repair and unreadable power-state explanations when exercising those failure paths.
+- Launch an isolated Debug app with `--args -SUFeedURL https://raw.githubusercontent.com/kzahel/lid-awake/main/missing-test-appcast.xml -SUEnableAutomaticChecks NO` for a missing-feed check. Expect an error dialog, then a persistent error beneath the button after dismissal. Relaunch without the overrides and verify a successful check. Do not change the published appcast for this test.
+- Confirm automatic checks initialize without opening Settings: with automatic checks enabled and the Debug app's last-check date cleared, launch it and verify a new `SULastCheckTime` preference before opening any windows. Restore test preferences afterward. This does not replace observing a full daily interval.
+- Inspect the General tab in English and German with both a result and the blocked-check explanation visible.
+
 Install a signed older version in `/Applications`, publish a newer signed version and appcast, use **Settings… → General → Check for Updates…**, and install it. Confirm the new version, Gatekeeper acceptance, helper status, and a fresh on/off toggle. If the menu says **Helper needs repair**, choose **Repair Helper…** while normal sleep is on, then confirm the registered helper build matches the app. Try while an awake session is active; the app should refuse installation until the session is off. Never substitute two clean installs for this old-to-new test.

@@ -16,6 +16,7 @@ final class SettingsWindowController: NSWindowController {
     private let launchAtLogin = NSButton(checkboxWithTitle: tr("Launch at Login"), target: nil, action: nil)
     private let skipStartConfirmation = NSButton(checkboxWithTitle: tr("Don't show start confirmation"), target: nil, action: nil)
     private let checkUpdates = NSButton(title: tr("Check for Updates…"), target: nil, action: nil)
+    private let updateStatus = NSTextField(wrappingLabelWithString: "")
     private let onBatteryChange: (Int) -> Void
     private let onAction: (SettingsAction) -> Void
 
@@ -72,10 +73,12 @@ final class SettingsWindowController: NSWindowController {
         checkUpdates.target = self
         checkUpdates.action = #selector(checkForUpdates)
         checkUpdates.bezelStyle = .rounded
+        updateStatus.textColor = .secondaryLabelColor
+        updateStatus.widthAnchor.constraint(equalToConstant: 420).isActive = true
         launchAtLogin.target = self
         launchAtLogin.action = #selector(launchAtLoginChanged)
         return makeTab(tr("General"), views: [
-            heading(tr("Updates")), automaticChecks, checkUpdates,
+            heading(tr("Updates")), automaticChecks, checkUpdates, updateStatus,
             heading(tr("Startup")), launchAtLogin
         ])
     }
@@ -130,11 +133,13 @@ final class SettingsWindowController: NSWindowController {
     }
 
     func updateControls(automaticChecks: Bool, launchAtLogin: Bool,
-                        skipStartConfirmation: Bool, canCheckForUpdates: Bool) {
+                        skipStartConfirmation: Bool, canCheckForUpdates: Bool, updateStatus: String) {
         self.automaticChecks.state = automaticChecks ? .on : .off
         self.launchAtLogin.state = launchAtLogin ? .on : .off
         self.skipStartConfirmation.state = skipStartConfirmation ? .on : .off
         checkUpdates.isEnabled = canCheckForUpdates
+        self.updateStatus.stringValue = updateStatus
+        self.updateStatus.isHidden = updateStatus.isEmpty
     }
 
     func present() {

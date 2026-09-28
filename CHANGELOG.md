@@ -2,6 +2,11 @@
 
 Notable changes to Lid Awake are listed by release version.
 
+## [Unreleased]
+
+- Show update progress, results, and reasons a check is unavailable in Settings.
+- Start automatic update checking at app launch and refresh the check button immediately when the updater becomes ready.
+
 ## [0.0.11]
 
 - Add a Don't show this again checkbox to the Keep Awake confirmation. Settings → Safety can turn the confirmation back on.

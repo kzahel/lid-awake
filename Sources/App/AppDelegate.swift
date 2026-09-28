@@ -7,6 +7,10 @@ import UserNotifications
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpdaterDelegate {
     private let helper = HelperClient()
     private lazy var updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
+    private var updaterObservation: NSKeyValueObservation?
+    private var manualUpdateCheck = false
+    private var updateCheckFoundResult = false
+    private var updateStatus = ""
     private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let menu = NSMenu()
     private let log = Logger(subsystem: "com.kzahel.lidawake", category: "app")
@@ -41,6 +45,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
         setStatusIcon()
         item.menu = menu
         menu.delegate = self
+        // Start scheduled checks even if Settings is never opened. Observe Sparkle
+        // directly so the button doesn't wait for the ten-second power refresh.
+        updaterObservation = updater.updater.observe(\.canCheckForUpdates, options: [.new]) { [weak self] _, _ in
+            self?.updateSettingsControls()
+        }
         refresh(checkHelper: true)
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in self?.tick() }
     }
@@ -60,6 +69,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
             throw NSError(domain: "LidAwake.Update", code: 1,
                           userInfo: [NSLocalizedDescriptionKey: tr("Restore normal sleep before installing an update.")])
         }
+    }
+
+    func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
+        guard manualUpdateCheck else { return }
+        updateCheckFoundResult = true
+        updateStatus = trf("Version %@ is available.", item.displayVersionString)
+        updateSettingsControls()
+    }
+
+    func updaterDidNotFindUpdate(_ updater: SPUUpdater, error: Error) {
+        guard manualUpdateCheck else { return }
+        updateCheckFoundResult = true
+        // Sparkle distinguishes being current from needing a newer macOS version.
+        updateStatus = error.localizedDescription
+        updateSettingsControls()
+    }
+
+    func updater(_ updater: SPUUpdater, didFinishUpdateCycleFor updateCheck: SPUUpdateCheck, error: Error?) {
+        guard manualUpdateCheck else { return }
+        manualUpdateCheck = false
+        if let error {
+            updateStatus = error.localizedDescription
+        } else if !updateCheckFoundResult {
+            updateStatus = tr("Update check canceled.")
+        }
+        updateSettingsControls()
     }
 
     func menuWillOpen(_ menu: NSMenu) {
@@ -469,7 +504,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     }
 
     @objc private func checkForUpdates() {
-        guard !active && observed == false && !repairing else { return }
+        if let reason = updateCheckBlockReason {
+            showInfo(tr("Check for Updates…"), reason)
+            return
+        }
+        guard updater.updater.canCheckForUpdates else {
+            updateSettingsControls()
+            return
+        }
+        // Sparkle can focus an existing update window without starting a new
+        // check. Keep its result instead of leaving Settings at "Checking…".
+        if updater.updater.sessionInProgress {
+            updater.updater.checkForUpdates()
+            return
+        }
+        manualUpdateCheck = true
+        updateCheckFoundResult = false
+        updateStatus = tr("Checking for updates…")
+        updateSettingsControls()
         updater.updater.checkForUpdates()
     }
 
@@ -538,12 +590,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
         settingsWindow?.present()
     }
 
+    private var updateCheckBlockReason: String? {
+        if repairing { return tr("Wait for helper repair to finish before checking for updates.") }
+        if active || observed == true { return tr("Restore normal sleep before checking for updates.") }
+        if observed == nil { return tr("Normal sleep could not be verified. Restore it before checking for updates.") }
+        return nil
+    }
+
     private func updateSettingsControls() {
-        settingsWindow?.updateControls(
+        guard let settingsWindow else { return }
+        let canCheck = updater.updater.canCheckForUpdates
+        let status = updateCheckBlockReason ?? (!canCheck && !manualUpdateCheck
+            ? tr("An update check is already in progress…") : updateStatus)
+        settingsWindow.updateControls(
             automaticChecks: updater.updater.automaticallyChecksForUpdates,
             launchAtLogin: SMAppService.mainApp.status == .enabled,
             skipStartConfirmation: skipStartConfirmation,
-            canCheckForUpdates: !active && observed == false && !repairing && updater.updater.canCheckForUpdates)
+            canCheckForUpdates: updateCheckBlockReason == nil && canCheck,
+            updateStatus: status)
     }
 
     private func maybeNotifyStop(_ reason: StopReason?) {

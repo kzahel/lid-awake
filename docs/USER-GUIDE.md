@@ -40,6 +40,8 @@ To skip the start confirmation, select **Don't show this again** when starting a
 
 Lid Awake checks for updates daily by default and lets you choose when to install them. To check manually, choose **Settings… → General → Check for Updates…** when no session is active.
 
+The text below the button shows the check result or explains why checking is unavailable. If it asks you to restore normal sleep, end the awake session first. A failed check shows an error rather than reporting that the app is up to date; you can try again afterward.
+
 After an update, the menu may show **Helper needs repair**. Choose **Repair Helper…** while normal sleep is on. macOS may ask you to approve the updated helper again.
 
 ## Background helper behavior

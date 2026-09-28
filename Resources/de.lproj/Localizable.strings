@@ -4,6 +4,13 @@
 "Cancel" = "Abbrechen";
 "Charging" = "Netzteil angeschlossen";
 "Check for Updates…" = "Nach Updates suchen…";
+"Checking for updates…" = "Nach Updates wird gesucht…";
+"Version %@ is available." = "Version %@ ist verfügbar.";
+"Update check canceled." = "Update-Suche abgebrochen.";
+"Wait for helper repair to finish before checking for updates." = "Warte, bis die Reparatur des Hilfsdiensts abgeschlossen ist, bevor du nach Updates suchst.";
+"Restore normal sleep before checking for updates." = "Stelle den normalen Ruhezustand wieder her, bevor du nach Updates suchst.";
+"Normal sleep could not be verified. Restore it before checking for updates." = "Der normale Ruhezustand konnte nicht bestätigt werden. Stelle ihn wieder her, bevor du nach Updates suchst.";
+"An update check is already in progress…" = "Es wird bereits nach Updates gesucht…";
 "Copy Report" = "Bericht kopieren";
 "Could not enable Lid Awake." = "Lid Awake konnte nicht aktiviert werden.";
 "Could not remove diagnostic state." = "Diagnosedaten konnten nicht entfernt werden.";
