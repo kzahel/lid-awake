@@ -7,6 +7,7 @@ private final class FakePower: PowerController {
     private let queue = DispatchQueue(label: "com.kzahel.lidawake.fakepower")
     private var state: Bool? = false
     private var failing = false
+    private var source: PowerSource = .ac
     var disabled: Bool? {
         get { queue.sync { state } }
         set { queue.sync { state = newValue } }
@@ -15,8 +16,12 @@ private final class FakePower: PowerController {
         get { queue.sync { failing } }
         set { queue.sync { failing = newValue } }
     }
+    var power: PowerSource {
+        get { queue.sync { source } }
+        set { queue.sync { source = newValue } }
+    }
     func observedSleepDisabled() -> Bool? { disabled }
-    func powerSource() -> PowerSource { .ac }
+    func powerSource() -> PowerSource { power }
     func thermalState() -> ProcessInfo.ThermalState { .nominal }
     func setSleepDisabled(_ value: Bool) -> (Bool, String?) {
         queue.sync {
@@ -95,8 +100,45 @@ private func testFailedRestoreRetries() {
     print("Helper failed-readback retry passed")
 }
 
+private func testNewSessionModes() {
+    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: dir) }
+    let fake = FakePower()
+    let service = HelperService(label: label, markerDirectory: dir, power: fake)
+    let closedStart = DispatchSemaphore(value: 0)
+    service.start(mode: SessionMode.untilUnplugged.rawValue, minutes: 0,
+                  allowClosedLid: true, batteryCutoff: 0) { ok, error in
+        require(ok, "until-unplugged start failed: \(error ?? "unknown")")
+        closedStart.signal()
+    }
+    require(closedStart.wait(timeout: .now() + 15) == .success, "until-unplugged start timed out")
+    require(fake.disabled == true, "closed-lid session did not set SleepDisabled")
+    fake.power = .battery(99)
+    Thread.sleep(forTimeInterval: 6)
+    require(fake.disabled == false, "unplugging did not restore normal sleep")
+
+    let openStart = DispatchSemaphore(value: 0)
+    service.start(mode: SessionMode.untilStopped.rawValue, minutes: 0,
+                  allowClosedLid: false, batteryCutoff: 0) { ok, error in
+        require(ok, "open-lid start failed: \(error ?? "unknown")")
+        openStart.signal()
+    }
+    require(openStart.wait(timeout: .now() + 15) == .success, "open-lid start timed out")
+    require(fake.disabled == false, "open-lid session changed global SleepDisabled")
+    let details = DispatchSemaphore(value: 0)
+    service.details { text in
+        let state = try? JSONDecoder().decode(SessionDetails.self, from: Data(text.utf8))
+        require(state?.active == true && state?.configuration?.mode == .untilStopped,
+                "open-lid session details are wrong")
+        details.signal()
+    }
+    require(details.wait(timeout: .now() + 15) == .success, "session details timed out")
+    disable(service)
+    print("Helper unplugged and open-lid modes passed")
+}
+
 require(geteuid() == 0, "run as root in a disposable VM")
-require(CommandLine.arguments.count == 2, "expected exercise, recover, watchdog, or retry")
+require(CommandLine.arguments.count == 2, "expected exercise, recover, watchdog, retry, or modes")
 
 switch CommandLine.arguments[1] {
 case "exercise":
@@ -131,6 +173,8 @@ case "watchdog":
     print("Helper no-heartbeat watchdog passed")
 case "retry":
     testFailedRestoreRetries()
+case "modes":
+    testNewSessionModes()
 default:
-    require(false, "expected exercise, recover, watchdog, or retry")
+    require(false, "expected exercise, recover, watchdog, retry, or modes")
 }

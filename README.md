@@ -1,6 +1,6 @@
 # Lid Awake
 
-Keep your MacBook running with the lid closed, from the menu bar. Choose a time limit, start a session, and turn it off when you are done. Lid Awake restores normal sleep when the time runs out, the app stops responding, the battery reaches 15%, or macOS reports serious heat.
+Keep your MacBook awake from the menu bar, including when you close the lid. Run until you turn it off, until you unplug, or for a chosen time. Lid Awake restores normal sleep at the selected limit, on serious heat, or if the app stops responding.
 
 **macOS 13 or later · [Download a test release](https://github.com/kzahel/lid-awake/releases)**
 
@@ -12,7 +12,9 @@ Keep your MacBook running with the lid closed, from the menu bar. Choose a time 
 
 ## Use
 
-Choose **Duration** (30 minutes to 4 hours), then **Keep Awake**. The menu shows the time remaining. Its badge is gray when normal sleep is on and orange when sleep is disabled. Choose **Restore Normal Sleep** to end a session early.
+Choose **Keep Mac awake → Lid open only** for ordinary idle sleep prevention, or **Even when closed** to keep working after the lid closes. Choose **Stop when → Until I turn it off**, **Until unplugged** (available while charging), or **After a time limit**. Timed sessions can run for 15 minutes to 4 hours. Then choose **Start Keeping Awake** and confirm the ventilation warning. These choices start keeping the Mac awake immediately; they do not wait for a lid event. **Restore Normal Sleep** ends a session.
+
+**Settings…** offers a battery cutoff of Off, 15%, 20%, or 30%. It applies to sessions that can run on battery. The helper always stops for serious or critical thermal state and for sustained unreadable power. The menu shows the power source, active condition, and last stop reason. Its icon adds a battery cue while active on battery and an attention cue for helper repair or recovery. **Report a Problem…** lets you review and edit diagnostics before opening a GitHub issue; **Send Feedback…** opens a blank issue. **Uninstall…** restores and verifies normal sleep before removing the helper and login item.
 
 After an update, the menu may show **Helper needs repair**. Choose **Repair Helper…** while normal sleep is on. macOS may ask you to approve the updated helper again.
 
@@ -26,9 +28,9 @@ Lid Awake checks for updates daily by default and lets you choose when to instal
 
 ## How it compares
 
-[Compare Lid Awake with Lidless and Awayke](COMPETITIVE-ANALYSIS.md) for size, helper security, recovery, safety features, updates, and testing. Lid Awake favors short sessions with a fixed end time and a small menu; Lidless offers more controls, while Awayke has a quicker toggle and more session modes. The comparison also lists what Lid Awake has not tested yet.
+[Compare Lid Awake with Lidless and Awayke](COMPETITIVE-ANALYSIS.md) for the research snapshot that motivated these controls. Its measured sizes and feature table describe version 0.0.5.
 
-The [roadmap](docs/ROADMAP.md) tracks physical acceptance and the remaining reliability checks before adding more session modes.
+The [roadmap](docs/ROADMAP.md) tracks physical acceptance and remaining reliability checks.
 
 See the [changelog](CHANGELOG.md) for release notes.
 

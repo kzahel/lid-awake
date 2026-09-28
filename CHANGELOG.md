@@ -2,6 +2,14 @@
 
 Notable changes to Lid Awake are listed by release version.
 
+## [0.0.7]
+
+- Add Until I turn it off, Until unplugged, and 15-minute through 4-hour sessions. Choose whether to keep the Mac awake only with the lid open or even when it closes.
+- Add adjustable battery cutoff (Off, 15%, 20%, or 30%). Every session still stops for serious heat, unreadable power, or a lost app heartbeat. The helper records the last stop reason.
+- Show charging and battery status, active battery and repair cues in the menu icon, session stop notifications, and a safety settings window.
+- Add reviewable problem reports with recent Lid Awake events, a feedback link, and guided uninstall that verifies normal sleep before removing the helper.
+- Add German localization for the app's controls, safety guidance, and recovery messages.
+
 ## [0.0.6]
 
 - Start the privileged helper when needed and let it exit after 30 idle seconds. It stays running during an awake session and restarts after a crash to restore normal sleep.

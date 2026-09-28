@@ -1,0 +1,270 @@
+<div id="lid-awake-menu-sketch" class="viz-dotted-background">
+  <style>
+    #lid-awake-menu-sketch {
+      --la-bg: light-dark(#f8f8fa, #252528);
+      --la-surface: light-dark(#ffffff, #303034);
+      --la-text: light-dark(#202024, #f4f4f6);
+      --la-muted: light-dark(#67676d, #b5b5bc);
+      --la-line: light-dark(#dcdce0, #505056);
+      --la-hover: light-dark(#ececf0, #414146);
+      --la-selected: light-dark(#dceafb, #314967);
+      --la-orange: light-dark(#d76315, #f28a39);
+      --la-warning: light-dark(#a43824, #ffb17f);
+      color-scheme: light dark;
+      color: var(--la-text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 12px 28px;
+      font: 13px/1.35 -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #lid-awake-menu-sketch * { box-sizing: border-box; }
+    #lid-awake-menu-sketch .la-preview {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 6px 12px; color: var(--la-muted);
+    }
+    #lid-awake-menu-sketch .la-preview button {
+      font: inherit; color: var(--la-text); background: var(--la-surface);
+      border: 1px solid var(--la-line); border-radius: 7px;
+      padding: 5px 10px; min-height: 30px;
+    }
+    #lid-awake-menu-sketch .la-preview button[aria-pressed="true"] { background: var(--la-selected); }
+    #lid-awake-menu-sketch .la-shell { width: min(100%, 380px); }
+    #lid-awake-menu-sketch .la-bar {
+      height: 31px; display: flex; align-items: center; justify-content: flex-end;
+      gap: 10px; padding: 0 12px; color: var(--la-text);
+      background: var(--la-bg); border: 1px solid var(--la-line);
+      border-radius: 9px 9px 0 0;
+    }
+    #lid-awake-menu-sketch .la-bar span { color: var(--la-muted); }
+    #lid-awake-menu-sketch .la-icon {
+      width: 21px; height: 21px; border-radius: 5px;
+      background: var(--la-muted); color: var(--la-surface);
+      display: inline-flex; align-items: center; justify-content: center;
+      position: relative; flex: 0 0 auto;
+    }
+    #lid-awake-menu-sketch .la-icon.active { background: var(--la-orange); color: #151515; }
+    #lid-awake-menu-sketch .la-icon.warning { background: var(--la-warning); color: #151515; }
+    #lid-awake-menu-sketch .la-screen {
+      width: 11px; height: 8px; border: 1.4px solid currentColor;
+      border-radius: 1px; position: absolute; top: 4px;
+    }
+    #lid-awake-menu-sketch .la-base {
+      width: 14px; border-top: 1.5px solid currentColor;
+      position: absolute; top: 14px;
+    }
+    #lid-awake-menu-sketch .la-icon .la-cue {
+      display: none; position: absolute; right: -5px; bottom: -4px;
+      min-width: 11px; height: 11px; padding: 0 2px;
+      border-radius: 6px; background: var(--la-surface);
+      color: var(--la-text); border: 1px solid var(--la-line);
+      font-size: 9px; line-height: 9px; text-align: center;
+    }
+    #lid-awake-menu-sketch .la-icon.battery .la-cue,
+    #lid-awake-menu-sketch .la-icon.warning .la-cue { display: block; }
+    #lid-awake-menu-sketch .la-menu {
+      background: var(--la-surface); border: 1px solid var(--la-line);
+      border-top: 0; border-radius: 0 0 11px 11px;
+      box-shadow: 0 12px 32px light-dark(#00000022, #00000070);
+      padding: 14px;
+    }
+    #lid-awake-menu-sketch .la-title {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; font-size: 14px; font-weight: 500;
+    }
+    #lid-awake-menu-sketch .la-status {
+      color: var(--la-muted); padding-top: 3px; padding-bottom: 11px;
+      border-bottom: 1px solid var(--la-line);
+    }
+    #lid-awake-menu-sketch .la-block { margin-top: 13px; }
+    #lid-awake-menu-sketch .la-label { display: block; font-weight: 500; margin-bottom: 7px; }
+    #lid-awake-menu-sketch .la-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    #lid-awake-menu-sketch .la-choices button,
+    #lid-awake-menu-sketch .la-mode button {
+      background: transparent; color: var(--la-text); border: 1px solid var(--la-line);
+      border-radius: 6px; font: inherit; text-align: left; padding: 8px 9px;
+      min-height: 37px;
+    }
+    #lid-awake-menu-sketch button { cursor: pointer; }
+    #lid-awake-menu-sketch button:disabled { opacity: .48; cursor: default; }
+    #lid-awake-menu-sketch .la-choices button[aria-pressed="true"],
+    #lid-awake-menu-sketch .la-mode button[aria-pressed="true"] {
+      background: var(--la-selected); border-color: var(--la-selected);
+    }
+    #lid-awake-menu-sketch .la-mode { display: grid; gap: 5px; }
+    #lid-awake-menu-sketch .la-mode button { display: flex; justify-content: space-between; }
+    #lid-awake-menu-sketch .la-mode small { color: var(--la-muted); font: inherit; }
+    #lid-awake-menu-sketch .la-note { color: var(--la-muted); padding-top: 7px; }
+    #lid-awake-menu-sketch .la-primary {
+      width: 100%; min-height: 37px; margin-top: 13px; border: 0;
+      border-radius: 7px; background: var(--la-orange);
+      color: #151515; font: inherit; font-weight: 500;
+    }
+    #lid-awake-menu-sketch .la-secondary {
+      width: 100%; min-height: 37px; margin-top: 12px;
+      background: var(--la-hover); color: var(--la-text);
+      border: 0; border-radius: 7px; font: inherit;
+    }
+    #lid-awake-menu-sketch .la-active-line { padding-top: 13px; font-weight: 500; }
+    #lid-awake-menu-sketch .la-detail { color: var(--la-muted); padding-top: 5px; }
+    #lid-awake-menu-sketch .la-footer {
+      border-top: 1px solid var(--la-line); margin-top: 13px; padding-top: 7px;
+    }
+    #lid-awake-menu-sketch .la-footer div { padding: 5px 3px; }
+    #lid-awake-menu-sketch .la-footer .la-safety { color: var(--la-muted); }
+    #lid-awake-menu-sketch .la-danger { color: var(--la-warning); }
+    #lid-awake-menu-sketch .la-link {
+      display: block; width: 100%; padding: 5px 3px; text-align: left;
+      background: transparent; color: var(--la-text); border: 0;
+      font: inherit;
+    }
+    #lid-awake-menu-sketch .la-link:hover { background: var(--la-hover); }
+    #lid-awake-menu-sketch .la-setting {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--la-line);
+    }
+    #lid-awake-menu-sketch .la-setting label { font-weight: 500; }
+    #lid-awake-menu-sketch .la-setting select {
+      max-width: 130px; min-height: 30px; padding: 3px 5px;
+      background: var(--la-bg); color: var(--la-text);
+      border: 1px solid var(--la-line); border-radius: 5px; font: inherit;
+    }
+    #lid-awake-menu-sketch .la-setting-value { color: var(--la-muted); text-align: right; }
+    #lid-awake-menu-sketch .la-settings-title { margin-top: 12px; font-weight: 500; }
+    #lid-awake-menu-sketch [hidden] { display: none !important; }
+  </style>
+  <div class="la-preview" aria-label="Preview conditions">
+    <span>Preview power:</span>
+    <button type="button" data-power="ac" aria-pressed="true">Charging</button>
+    <button type="button" data-power="battery" aria-pressed="false">Battery</button>
+    <button type="button" data-repair aria-pressed="false">Helper needs repair</button>
+  </div>
+  <div class="la-shell">
+    <div class="la-bar"><span>Mon 10:42</span><div class="la-icon" data-icon aria-label="Normal sleep"><span class="la-screen"></span><span class="la-base"></span><span class="la-cue" data-cue></span></div></div>
+    <div class="la-menu" role="group" aria-label="Proposed Lid Awake menu">
+      <div class="la-title"><span>Lid Awake</span><span data-power-label>Charging</span></div>
+      <div class="la-status" data-status aria-live="polite">Off · Normal sleep</div>
+      <div data-idle>
+        <div class="la-block">
+          <span class="la-label">Keep Mac awake</span>
+          <div class="la-choices" role="group" aria-label="Lid coverage">
+            <button type="button" data-scope="open" aria-pressed="false">Lid open only</button>
+            <button type="button" data-scope="closed" aria-pressed="true">Even when closed</button>
+          </div>
+          <div class="la-note" data-scope-note>Starts now and keeps running when you close the lid.</div>
+        </div>
+        <div class="la-block">
+          <span class="la-label">Stop when</span>
+          <div class="la-mode" role="group" aria-label="Session duration">
+            <button type="button" data-mode="manual" aria-pressed="false"><span>I turn it off</span></button>
+            <button type="button" data-mode="unplug" aria-pressed="false"><span>Unplugged</span><small data-unplug-hint>Charging only</small></button>
+            <button type="button" data-mode="timed" aria-pressed="true"><span>After 3 hours</span></button>
+          </div>
+        </div>
+        <button type="button" class="la-primary" data-start>Start keeping awake</button>
+      </div>
+      <div data-active hidden>
+        <div class="la-active-line" data-active-title>Keeping Mac awake · 3 hours left</div>
+        <div class="la-detail" data-active-detail>Even when the lid closes · Charging</div>
+        <button type="button" class="la-secondary" data-stop>Restore Normal Sleep</button>
+      </div>
+      <div data-problem hidden>
+        <div class="la-active-line la-danger">Helper needs repair</div>
+        <div class="la-detail">Closed-lid sessions cannot start until the helper is repaired.</div>
+        <button type="button" class="la-secondary" data-fix>Repair Helper…</button>
+      </div>
+      <div data-settings hidden>
+        <button type="button" class="la-link" data-back>‹ Back to menu</button>
+        <div class="la-settings-title">Safety settings</div>
+        <div class="la-setting">
+          <label for="la-battery-cutoff">Stop on battery at</label>
+          <select id="la-battery-cutoff" data-cutoff>
+            <option value="15" selected>15%</option>
+            <option value="20">20%</option>
+            <option value="30">30%</option>
+            <option value="off">Off</option>
+          </select>
+        </div>
+        <div class="la-note" data-cutoff-note>Applies to timed and Until turned off sessions on battery. Until unplugged ends before this setting applies.</div>
+        <div class="la-setting">
+          <span>High heat</span>
+          <span class="la-setting-value">Stop at serious / critical</span>
+        </div>
+        <div class="la-note">This safeguard stays on for every session, including while charging.</div>
+      </div>
+      <div class="la-footer" data-footer>
+        <div class="la-safety" data-safety-summary>Safety: battery cutoff 15% · stops on serious heat</div>
+        <button type="button" class="la-link" data-settings-link>Settings…</button>
+        <div>Report a Problem…</div>
+        <div>Uninstall…</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById('lid-awake-menu-sketch');
+      const state = { power: 'ac', scope: 'closed', mode: 'timed', active: false, repair: false, settings: false, cutoff: '15', message: '' };
+      const q = selector => root.querySelector(selector);
+      const qa = selector => [...root.querySelectorAll(selector)];
+      function render() {
+        qa('[data-power]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.power === state.power)));
+        qa('[data-scope]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.scope === state.scope)));
+        qa('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === state.mode)));
+        q('[data-repair]').setAttribute('aria-pressed', String(state.repair));
+        q('[data-power-label]').textContent = state.power === 'ac' ? 'Charging' : 'On battery · 64%';
+        q('[data-scope-note]').textContent = state.scope === 'closed'
+          ? 'Starts now and keeps running when you close the lid.'
+          : 'Prevents idle sleep now; closing the lid still sleeps the Mac.';
+        q('[data-mode="unplug"]').disabled = state.power !== 'ac';
+        q('[data-unplug-hint]').textContent = state.power === 'ac' ? 'Charging only' : 'Requires power';
+        q('[data-idle]').hidden = state.active || state.repair || state.settings;
+        q('[data-active]').hidden = !state.active || state.settings;
+        q('[data-problem]').hidden = !state.repair || state.active || state.settings;
+        q('[data-settings]').hidden = !state.settings;
+        q('[data-footer]').hidden = state.settings;
+        q('[data-start]').disabled = state.repair;
+        q('[data-cutoff]').value = state.cutoff;
+        q('[data-safety-summary]').textContent = 'Safety: battery cutoff '
+          + (state.cutoff === 'off' ? 'off' : state.cutoff + '%') + ' · stops on serious heat';
+        q('[data-cutoff-note]').textContent = state.cutoff === 'off'
+          ? 'No app battery cutoff for sessions that run on battery. Until unplugged still ends on unplug.'
+          : 'Applies to timed and Until turned off sessions on battery. Until unplugged ends before this setting applies.';
+        const icon = q('[data-icon]');
+        icon.className = 'la-icon' + (state.repair ? ' warning' : state.active ? ' active' : '')
+          + (state.active && state.power === 'battery' && !state.repair ? ' battery' : '');
+        q('[data-cue]').textContent = state.repair ? '!' : state.active && state.power === 'battery' ? '▰' : '';
+        icon.setAttribute('aria-label', state.repair ? 'Helper needs repair' : state.active
+          ? state.power === 'battery' ? 'Sleep prevented on battery' : 'Sleep prevented while charging'
+          : 'Normal sleep');
+        if (state.repair) q('[data-status]').textContent = 'Attention · Helper needs repair';
+        else if (state.active) q('[data-status]').textContent = 'On · System sleep prevented now';
+        else q('[data-status]').textContent = state.message || 'Off · Normal sleep';
+        q('[data-active-title]').textContent = state.mode === 'manual' ? 'Keeping Mac awake · Until turned off'
+          : state.mode === 'unplug' ? 'Keeping Mac awake · Until unplugged'
+          : 'Keeping Mac awake · 3 hours left';
+        q('[data-active-detail]').textContent = (state.scope === 'closed' ? 'Even when the lid closes' : 'While the lid is open')
+          + ' · ' + (state.power === 'ac' ? 'Charging' : 'Battery 64%');
+      }
+      qa('[data-power]').forEach(button => button.addEventListener('click', () => {
+        state.power = button.dataset.power;
+        if (state.power === 'battery' && state.active && state.mode === 'unplug') {
+          state.active = false;
+          state.message = 'Off · Unplugged; session ended';
+        }
+        if (state.power === 'battery' && state.mode === 'unplug' && !state.active) state.mode = 'manual';
+        render();
+      }));
+      qa('[data-scope]').forEach(button => button.addEventListener('click', () => { state.scope = button.dataset.scope; render(); }));
+      qa('[data-mode]').forEach(button => button.addEventListener('click', () => { if (!button.disabled) { state.mode = button.dataset.mode; render(); } }));
+      q('[data-start]').addEventListener('click', () => { if (!state.repair) { state.active = true; state.message = ''; render(); } });
+      q('[data-stop]').addEventListener('click', () => { state.active = false; state.message = 'Off · Normal sleep restored'; render(); });
+      q('[data-settings-link]').addEventListener('click', () => { state.settings = true; render(); });
+      q('[data-back]').addEventListener('click', () => { state.settings = false; render(); });
+      q('[data-cutoff]').addEventListener('change', event => { state.cutoff = event.target.value; render(); });
+      q('[data-repair]').addEventListener('click', () => { state.repair = !state.repair; render(); });
+      q('[data-fix]').addEventListener('click', () => { state.repair = false; state.message = 'Off · Helper ready'; render(); });
+      render();
+    })();
+  </script>
+</div>

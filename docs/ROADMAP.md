@@ -1,26 +1,27 @@
 # Roadmap
 
-Lid Awake 0.0.5 is a signed prerelease. Its aim is a predictable, bounded closed-lid session: background work continues, the user can see whether sleep is disabled, and normal sleep reliably returns. The [comparison](../COMPETITIVE-ANALYSIS.md) explains the tradeoffs with Lidless and Awayke; the [validation record](VALIDATION.md) distinguishes observed behavior from remaining tests.
+## Delivered in 0.0.7
 
-## Completed in 0.0.5
+- **Session choices:** Until I turn it off, Until unplugged while charging, and 15-minute to 4-hour time limits. Each choice starts preventing sleep immediately. Unplugging ends and disarms an Until unplugged session; reconnecting does not restart it.
+- **Lid coverage:** Lid open only uses an idle-sleep activity. Even when closed uses the privileged `SleepDisabled` setting and a recovery marker. Neither option keeps the display lit or waits to arm at lid close.
+- **Safety:** A battery cutoff of Off, 15%, 20%, or 30% applies to sessions that can run on battery. Serious/critical macOS thermal state, 30 seconds of unreadable power, and a lost app heartbeat always stop a session. The helper verifies restoration before clearing the marker. macOS thermal state is a pressure signal, not a prediction that the Mac will cool down safely in a bag.
+- **Status and diagnostics:** The menu shows power source, session condition, countdown, last stop reason, and helper repair or recovery state. The icon adds battery and attention cues. App and helper events use unified logging; a reviewable problem report includes recent Lid Awake events and can open a prefilled GitHub issue. General feedback opens an issue without diagnostics.
+- **Removal and language:** Uninstall verifies normal sleep, unregisters the helper and login item, optionally removes preferences and diagnostic state, and guides moving the app to Trash. App controls and guidance have a German translation; English remains the source language.
 
-1. **Verified restoration and recovery.** The helper keeps its marker until I/O Registry reports `SleepDisabled = No`. Failed or unreadable restoration remains visible and retries every five seconds. The root VM harness covers a successful `pmset` exit with failed state read-back, followed by recovery. The menu distinguishes an owned session, recovery, an external override, and a helper fault.
-2. **Root helper boundary.** The installed helper accepts the signed app and rejects an unsigned XPC client. The VM helper log explicitly reports a forbidden message due to its code-signing requirement. The protocol still accepts only fixed operations and allowed durations. A differently signed client remains untested.
-3. **Helper update repair.** The app checks the registered helper's build and offers **Repair Helper…** while normal sleep is observed. A real 0.0.4-to-0.0.5 Sparkle update in the VM left a version-3 helper registered; the menu detected it, and repair registered the version-5 helper without another password prompt in that VM.
-4. **Heat and power limits.** The helper separates AC, battery percentage, and unavailable readings. It refuses a new session when power is unknown or thermal state is serious or critical; an active session restores at 15% battery, serious or critical heat, or after 30 seconds of unknown power. Injected-reading unit tests cover the thresholds without heating or draining a Mac.
+The [interactive menu sketch](../work/power-menu-sketch.html) shows the policy model. The shipped UI uses native AppKit menus and a settings window.
 
 ## Before a stable release
 
-1. **Physical acceptance on the release candidate.** Run the timestamped heartbeat test with the lid closed, then the normal-sleep control after turning Lid Awake off. Check screen lock and remote agent continuity during both. Confirm Gatekeeper, helper repair or approval, quit recovery, and update behavior on a stock SIP-enabled Mac. The earlier 0.0.3 closed-lid session and 0.0.4 icon/on-off test do not cover this full sequence together.
-2. **More failure evidence.** Simulate an external `SleepDisabled` change during a session, unreadable I/O Registry, and a helper launch failure after update. Confirm that the UI guides recovery and never reports off while the marker is unresolved. Exercise the thermal and unknown-power cutoffs in the root integration harness as well as the policy tests.
-3. **Update interval.** Verify automatic daily update discovery over a full interval. Manual **Check for Updates…** and an actual signed old-to-new install have already passed.
+1. Run the timestamped heartbeat and normal-sleep control with the lid closed on the 0.0.7 candidate. Observe screen lock and remote agent continuity. Check helper approval, repair, quit recovery, update behavior, and uninstall on a stock SIP-enabled Mac. Earlier physical and VM checks do not cover this sequence together.
+2. Exercise external `SleepDisabled` changes, unreadable I/O Registry state, helper launch failure, and thermal/unknown-power cutoffs in the root harness and installed app. Confirm the menu never reports normal sleep while recovery is unresolved.
+3. Observe automatic update discovery over a full daily interval. Manual update and an earlier signed old-to-new installation have passed.
+4. Review German menu width, VoiceOver descriptions, keyboard navigation, and longer localized alerts on a physical Mac.
 
-## Then improve convenience
+## Later options to investigate
 
-- Decide the screen-lock policy from physical tests. If needed, offer an explicit lock action when starting a session while keeping remote agent use workable.
-- Consider an “until lid reopens” option only with a hard maximum duration. Keep indefinite sessions outside the default transit flow. Add charging-only mode or configurable thresholds if real use shows a need.
-- Improve plain-language recovery instructions if the physical test reveals confusing macOS approval or helper failure states.
-
-## Size and scope
-
-Keep the native AppKit app and Sparkle updater. The installed 0.0.5 app uses about 3.4 MiB in the Tart VM, small enough for this job. Track bundle size, memory, and idle CPU use across releases; optimize a meaningful regression rather than trading away recovery or updates for a smaller download.
+- Prototype **only while the lid is closed** before adding it. A lid-close event may arrive too late to install a global override, while pre-installing that override would also affect open-lid behavior.
+- Consider **Until lid reopens** with a maximum duration only after the lid-state transition has physical test evidence.
+- Decide whether a screen-lock action is useful without interfering with remote work. Keep the display behavior separate from system sleep behavior.
+- Assess whether an optional earlier thermal cutoff at macOS's **fair** state helps in practice. The serious/critical guard remains mandatory.
+- Consider automatic enable on charging only as a separate, clearly labeled opt-in policy. Selecting Until unplugged does not auto-arm on reconnect.
+- Track bundle size, idle CPU, and memory across releases, and optimize measured regressions.

@@ -20,6 +20,7 @@ targets:
       - Sources/App
       - Sources/Shared
       - Resources/Assets.xcassets
+      - Resources/de.lproj/Localizable.strings
     info:
       path: Sources/App/Info.plist
       properties:

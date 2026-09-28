@@ -22,6 +22,14 @@ final class HelperClient {
 
     func register() throws { try service.register() }
 
+    func unregister(completion: @escaping (String?) -> Void) {
+        connection?.invalidate()
+        connection = nil
+        service.unregister { error in
+            DispatchQueue.main.async { completion(error?.localizedDescription) }
+        }
+    }
+
     func openApprovalSettings() { SMAppService.openSystemSettingsLoginItems() }
 
     func repair(completion: @escaping (String?) -> Void) {
@@ -67,6 +75,14 @@ final class HelperClient {
         }
     }
 
+    func start(_ configuration: SessionConfiguration, completion: @escaping (Bool, String?) -> Void) {
+        call(completion) { proxy, finish in
+            proxy.start(mode: configuration.mode.rawValue, minutes: configuration.minutes,
+                        allowClosedLid: configuration.allowClosedLid,
+                        batteryCutoff: configuration.batteryCutoff) { ok, error in finish(ok, error) }
+        }
+    }
+
     func disable(completion: @escaping (Bool, String?) -> Void) {
         call(completion) { proxy, finish in proxy.disable { ok, error in finish(ok, error) } }
     }
@@ -108,6 +124,29 @@ final class HelperClient {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             finish(nil, "The helper did not answer its health check.")
+        }
+    }
+
+    func getDetails(completion: @escaping (SessionDetails?) -> Void) {
+        var finished = false
+        let finish: (SessionDetails?) -> Void = { details in
+            DispatchQueue.main.async {
+                guard !finished else { return }
+                finished = true
+                completion(details)
+            }
+        }
+        guard let remote = proxy(onError: { _ in finish(nil) }) else { finish(nil); return }
+        remote.details { text in
+            let details = try? JSONDecoder().decode(SessionDetails.self, from: Data(text.utf8))
+            finish(details)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { finish(nil) }
+    }
+
+    func removeDiagnostics(completion: @escaping (Bool, String?) -> Void) {
+        call(completion) { proxy, finish in
+            proxy.removeDiagnostics { ok, error in finish(ok, error) }
         }
     }
 

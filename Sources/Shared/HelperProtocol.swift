@@ -18,8 +18,12 @@ enum HelperIdentity {
 
 @objc protocol LidAwakeHelperProtocol {
     func enable(forMinutes minutes: Int, withReply reply: @escaping (Bool, String?) -> Void)
+    func start(mode: Int, minutes: Int, allowClosedLid: Bool, batteryCutoff: Int,
+               withReply reply: @escaping (Bool, String?) -> Void)
     func disable(withReply reply: @escaping (Bool, String?) -> Void)
     func heartbeat(withReply reply: @escaping (Bool) -> Void)
     func status(withReply reply: @escaping (Bool, Int) -> Void)
     func health(withReply reply: @escaping (Int, Bool, Int, String?) -> Void)
+    func details(withReply reply: @escaping (String) -> Void)
+    func removeDiagnostics(withReply reply: @escaping (Bool, String?) -> Void)
 }

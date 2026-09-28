@@ -31,3 +31,4 @@ trap cleanup EXIT
 "$binary" recover
 "$binary" watchdog
 "$binary" retry
+"$binary" modes
