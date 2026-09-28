@@ -45,12 +45,14 @@ final class HelperClient {
         if connection == nil {
             let newConnection = NSXPCConnection(machServiceName: label, options: .privileged)
             newConnection.remoteObjectInterface = NSXPCInterface(with: LidAwakeHelperProtocol.self)
-            newConnection.invalidationHandler = { [weak self, weak newConnection] in
+            let clearConnection = { [weak self, weak newConnection] in
                 DispatchQueue.main.async {
                     guard let self, let newConnection, self.connection === newConnection else { return }
                     self.connection = nil
                 }
             }
+            newConnection.interruptionHandler = clearConnection
+            newConnection.invalidationHandler = clearConnection
             newConnection.resume()
             connection = newConnection
         }

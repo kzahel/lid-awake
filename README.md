@@ -16,6 +16,8 @@ Choose **Duration** (30 minutes to 4 hours), then **Keep Awake**. The menu shows
 
 After an update, the menu may show **Helper needs repair**. Choose **Repair Helper…** while normal sleep is on. macOS may ask you to approve the updated helper again.
 
+The approved helper starts when needed and exits after about 30 seconds without a session or request. It also starts briefly when its launchd job loads, so it can recover an interrupted session. During an active session it stays running to enforce the time, battery, and heat limits. The menu bar app itself stays open while its icon is visible. The **Lid Awake** switch in macOS Login Items & Extensions grants background permission; it may remain visible even while the helper process is stopped.
+
 Keep the Mac on a hard, ventilated surface while the lid is closed. Avoid putting it in an enclosed bag while it is running.
 
 ## Updates

@@ -28,6 +28,7 @@ final class HelperService: NSObject, LidAwakeHelperProtocol {
     private var lastHeartbeat: TimeInterval = 0
     private var unknownPowerSince: TimeInterval?
     private var recoveryIssue: String?
+    private var lastRequest = ProcessInfo.processInfo.systemUptime
     private var timer: DispatchSourceTimer?
 
     init(label: String, markerDirectory: URL? = nil, power: PowerController = SystemPowerController()) {
@@ -50,6 +51,7 @@ final class HelperService: NSObject, LidAwakeHelperProtocol {
 
     func enable(forMinutes minutes: Int, withReply reply: @escaping (Bool, String?) -> Void) {
         queue.async {
+            self.lastRequest = ProcessInfo.processInfo.systemUptime
             guard SessionPolicy.allowedMinutes.contains(minutes) else { reply(false, "Unsupported duration"); return }
             guard !self.active && !FileManager.default.fileExists(atPath: self.marker.path) else {
                 reply(false, "A session or recovery is still in progress.")
@@ -99,6 +101,7 @@ final class HelperService: NSObject, LidAwakeHelperProtocol {
 
     func disable(withReply reply: @escaping (Bool, String?) -> Void) {
         queue.async {
+            self.lastRequest = ProcessInfo.processInfo.systemUptime
             guard self.active || FileManager.default.fileExists(atPath: self.marker.path) else {
                 reply(false, "Lid Awake does not own the current sleep setting.")
                 return
@@ -110,6 +113,7 @@ final class HelperService: NSObject, LidAwakeHelperProtocol {
 
     func heartbeat(withReply reply: @escaping (Bool) -> Void) {
         queue.async {
+            self.lastRequest = ProcessInfo.processInfo.systemUptime
             if self.active && self.recoveryIssue == nil { self.lastHeartbeat = ProcessInfo.processInfo.systemUptime }
             reply(self.active)
         }
@@ -117,6 +121,7 @@ final class HelperService: NSObject, LidAwakeHelperProtocol {
 
     func status(withReply reply: @escaping (Bool, Int) -> Void) {
         queue.async {
+            self.lastRequest = ProcessInfo.processInfo.systemUptime
             let remaining = self.remainingSeconds()
             reply(self.active, remaining)
         }
@@ -124,6 +129,7 @@ final class HelperService: NSObject, LidAwakeHelperProtocol {
 
     func health(withReply reply: @escaping (Int, Bool, Int, String?) -> Void) {
         queue.async {
+            self.lastRequest = ProcessInfo.processInfo.systemUptime
             let build = Int(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "") ?? 0
             reply(build, self.active, self.remainingSeconds(), self.recoveryIssue)
         }
@@ -134,7 +140,15 @@ final class HelperService: NSObject, LidAwakeHelperProtocol {
     }
 
     private func enforceLimits() {
-        guard active else { return }
+        guard active else {
+            if FileManager.default.fileExists(atPath: marker.path) {
+                active = true
+                _ = restore()
+            } else if ProcessInfo.processInfo.systemUptime - lastRequest >= 30 {
+                exit(EXIT_SUCCESS)
+            }
+            return
+        }
         if recoveryIssue != nil || power.observedSleepDisabled() == false {
             _ = restore()
             return

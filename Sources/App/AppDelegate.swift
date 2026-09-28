@@ -50,16 +50,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
         }
     }
 
-    func menuWillOpen(_ menu: NSMenu) { renderMenu() }
+    func menuWillOpen(_ menu: NSMenu) {
+        renderMenu()
+        refresh(checkHelper: true)
+    }
 
     private func tick() {
         if active { helper.heartbeat() }
         refresh()
     }
 
-    private func refresh() {
+    private func refresh(checkHelper: Bool = false) {
+        let previousObserved = observed
         observed = PowerState.observedSleepDisabled()
-        if helper.status == .enabled {
+        if helper.status == .enabled &&
+            (active || setupPending || checkHelper || (observed == true && previousObserved != true)) {
             helper.getHealth { [weak self] health, error in
                 guard let self else { return }
                 if let health {
@@ -82,11 +87,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
                     self.showInfo("Helper Ready", "The helper is approved. Choose Keep Awake when you are ready.")
                 }
             }
-        } else {
+        } else if helper.status != .enabled {
             active = false
             helperNeedsRepair = false
             helperProblem = nil
             recoveryIssue = nil
+            updateIcon()
+            renderMenu()
+        } else {
             updateIcon()
             renderMenu()
         }
@@ -207,6 +215,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
     @objc private func selectDuration(_ sender: NSMenuItem) { chosenMinutes = sender.tag; renderMenu() }
 
     @objc private func toggleAwake() {
+        guard !busy else { return }
         if active {
             busy = true
             helper.disable { [weak self] ok, error in
@@ -220,14 +229,52 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
         }
         guard helper.status == .enabled else { setupHelper(); return }
         guard !helperNeedsRepair else { showError(helperProblem ?? "Repair the helper before starting a session."); return }
+        busy = true
+        renderMenu()
+        helper.getHealth { [weak self] health, error in
+            guard let self else { return }
+            guard let health else {
+                self.busy = false
+                self.helperNeedsRepair = true
+                let problem = error ?? "The helper is not responding."
+                self.helperProblem = problem
+                self.renderMenu()
+                self.showError(problem)
+                return
+            }
+            guard health.build == self.expectedHelperBuild else {
+                self.busy = false
+                self.helperNeedsRepair = true
+                let problem = "The registered helper is build \(health.build); this app is build \(self.expectedHelperBuild)."
+                self.helperProblem = problem
+                self.renderMenu()
+                self.showError(problem)
+                return
+            }
+            self.active = health.active
+            self.remaining = health.remaining
+            self.recoveryIssue = health.recoveryIssue
+            guard !health.active && self.observed == false else {
+                self.busy = false
+                self.refresh()
+                return
+            }
+            self.confirmAwake()
+        }
+    }
+
+    private func confirmAwake() {
         let alert = NSAlert()
         alert.messageText = "Keep running with the lid closed?"
         alert.informativeText = "Lid Awake will restore normal sleep after \(chosenMinutes) minutes, if this app stops responding, or when battery reaches 15%. Keep the Mac ventilated while it runs."
         alert.addButton(withTitle: "Keep Awake")
         alert.addButton(withTitle: "Cancel")
         NSApp.activate(ignoringOtherApps: true)
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
-        busy = true
+        guard alert.runModal() == .alertFirstButtonReturn else {
+            busy = false
+            renderMenu()
+            return
+        }
         helper.enable(minutes: chosenMinutes) { [weak self] ok, error in
             guard let self else { return }
             self.busy = false

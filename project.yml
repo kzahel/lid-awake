@@ -74,8 +74,7 @@ targets:
             <key>MachServices</key><dict><key>$label</key><true/></dict>
             <key>AssociatedBundleIdentifiers</key><array><string>${PRODUCT_BUNDLE_IDENTIFIER}</string></array>
             <key>EnvironmentVariables</key><dict><key>LID_AWAKE_MACH_LABEL</key><string>$label</string></dict>
-            <key>RunAtLoad</key><true/>
-            <key>KeepAlive</key><true/>
+            <key>KeepAlive</key><dict><key>SuccessfulExit</key><false/></dict>
           </dict></plist>
           EOF
           plutil -lint "$dir/$label.plist"

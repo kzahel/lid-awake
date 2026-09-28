@@ -21,6 +21,8 @@ Use a signed, notarized app copied to `/Applications`. On first launch, choose *
 
 With Lid Awake off, expect `No`. With it on, expect `Yes`. Quit the app while on; expect normal sleep to return. Repeat with a forced app termination and wait up to 90 seconds for the watchdog. Test a helper restart in an isolated Mac testbed and verify that the recovery marker restores normal sleep.
 
+With the signed helper approved, leave Lid Awake off and wait 40 seconds after closing its menu. `launchctl print system/com.kzahel.lidawake.helper` should show no running PID. Opening the menu should start the helper; it should exit again after the menu closes and another 40 idle seconds. During a session it should remain running, including with the menu closed. Force-kill the helper during a session in an isolated testbed and verify launchd restarts it and the startup marker recovery restores `SleepDisabled = No`.
+
 Run `scripts/test-xpc-denial-in-vm.sh` against the installed signed helper. It compiles an unsigned client, attempts a fixed XPC operation, and requires both a client connection failure and the helper's explicit code-signing rejection log. A generic XPC failure alone does not prove that the signing boundary worked.
 
 ## Menu bar contrast
