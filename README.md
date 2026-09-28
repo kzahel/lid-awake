@@ -30,6 +30,8 @@ Lid Awake checks for updates daily by default and lets you choose when to instal
 
 The [roadmap](docs/ROADMAP.md) tracks physical acceptance and the remaining reliability checks before adding more session modes.
 
+See the [changelog](CHANGELOG.md) for release notes.
+
 ## More information
 
 - [How it works and its safety limits](docs/IMPLEMENTATION.md)

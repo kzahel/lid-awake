@@ -37,6 +37,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
+      - name: Validate changelog and prepare release notes
+        run: python3 scripts/release-notes.py "${GITHUB_REF_NAME#v}" > "$RUNNER_TEMP/release-notes.md"
       - name: Select Xcode
         run: xcodebuild -version
       - name: Validate release credentials
@@ -122,7 +124,7 @@ jobs:
           fi
           gh release create "$tag" "$dir/LidAwake-$tag.dmg" \
             "$dir/appcast-input/LidAwake-$tag.zip" "${release_flags[@]}" --title "Lid Awake $tag" \
-            --notes "Signed and notarized macOS release."
+            --notes-file "$RUNNER_TEMP/release-notes.md"
       - name: Publish release and appcast
         env:
           GH_TOKEN: ${{ github.token }}

@@ -8,7 +8,8 @@ The release job uses a Developer ID Application certificate, an App Store Connec
 
 - Push and PR: build and test without publishing.
 - Before a stable release, validate the signed app on a stock macOS test environment, including Gatekeeper and helper approval, and complete the remaining [physical lid checks](VALIDATION.md). `v0.0.x` tags are prerelease test artifacts for exercising CI, installation, and Sparkle while acceptance work continues.
-- `v*` tag: require all signing and notarization secrets; build with hardened runtime, run tests, verify signatures, notarize, staple, create DMG and Sparkle update ZIP, sign the update archive, stage a draft GitHub Release, then publish it and the appcast after those checks pass.
+- Release: add a `## [VERSION]` entry to [CHANGELOG.md](../CHANGELOG.md), commit it on `main`, then run `./scripts/release.sh VERSION` without a leading `v`. The script requires a clean, current `main`, an unused version higher than the last tag, and a nonempty changelog entry before it pushes the tag.
+- `v*` tag: require the matching changelog entry and all signing and notarization secrets; build with hardened runtime, run tests, verify signatures, notarize, staple, create DMG and Sparkle update ZIP, sign the update archive, stage a draft GitHub Release with those changelog notes, then publish it and the appcast after those checks pass.
 
 The release job installs `dmgbuild==1.6.7` in a Python virtual environment. Its layout is in [`scripts/dmg-settings.py`](../scripts/dmg-settings.py), with the editable background in [`Resources/dmg-background.svg`](../Resources/dmg-background.svg) and its rendered PNG beside it. If the background changes, regenerate the PNG with `sips -s format png Resources/dmg-background.svg --out Resources/dmg-background.png` before packaging.
 
