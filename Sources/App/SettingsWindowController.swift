@@ -7,7 +7,6 @@ enum SettingsAction {
     case reportProblem
     case sendFeedback
     case uninstall
-    case quit
 }
 
 final class SettingsWindowController: NSWindowController {
@@ -72,8 +71,7 @@ final class SettingsWindowController: NSWindowController {
         launchAtLogin.action = #selector(launchAtLoginChanged)
         return makeTab(tr("General"), views: [
             heading(tr("Updates")), automaticChecks, checkUpdates,
-            heading(tr("Startup")), launchAtLogin,
-            heading(tr("Application")), button(tr("Quit Lid Awake"), #selector(quit))
+            heading(tr("Startup")), launchAtLogin
         ])
     }
 
@@ -145,5 +143,4 @@ final class SettingsWindowController: NSWindowController {
     @objc private func reportProblem() { onAction(.reportProblem) }
     @objc private func sendFeedback() { onAction(.sendFeedback) }
     @objc private func uninstall() { onAction(.uninstall) }
-    @objc private func quit() { onAction(.quit) }
 }

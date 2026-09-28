@@ -295,6 +295,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
         let settings = NSMenuItem(title: tr("Settings…"), action: #selector(showSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
+        menu.addItem(.separator())
+        let quit = NSMenuItem(title: tr("Quit Lid Awake"), action: #selector(quit), keyEquivalent: "q")
+        quit.target = self
+        menu.addItem(quit)
         updateSettingsControls()
     }
 
@@ -513,7 +517,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, SPUUpd
                     case .reportProblem: self.reportProblem()
                     case .sendFeedback: self.sendFeedback()
                     case .uninstall: self.uninstall()
-                    case .quit: self.quit()
                     }
                 })
         }

@@ -12,7 +12,7 @@ Lid Awake is a macOS menu bar power control. It can prevent idle sleep while the
 
 Until unplugged ends as soon as battery power is observed. Reconnecting does not restart it. A time limit, battery cutoff, heat cutoff, sustained unknown power, missed heartbeat, normal quit, or helper restart also disarms the session. None of these stops the user's workload while the lid stays open; they restore the normal macOS sleep policy.
 
-The compact menu shows the power source, active condition, countdown when timed, the last stop reason, the session controls, and **Settings…**. The badge is neutral when off, active while Lid Awake owns a session, marked **B** on battery, and marked **!** for repair or recovery. Accessibility descriptions convey the same state.
+The compact menu shows the power source, active condition, countdown when timed, the last stop reason, the session controls, **Settings…**, and **Quit Lid Awake**. The badge is neutral when off, active while Lid Awake owns a session, marked **B** on battery, and marked **!** for repair or recovery. Accessibility descriptions convey the same state.
 
 ## Safety and recovery
 
@@ -24,7 +24,7 @@ The helper accepts XPC requests from the signed app with the expected identifier
 
 ## Support and removal
 
-**Settings… → General** holds update checking, automatic checks, launch at login, and Quit. **Settings… → Support → Report a Problem…** shows an editable diagnostic summary and recent Lid Awake unified-log events before opening a prefilled GitHub issue. The user can copy the report and nothing is submitted automatically. **Send Feedback…** opens an issue without diagnostics. **Uninstall…** ends any session, verifies normal sleep, unregisters the helper and login item, offers removal of preferences and diagnostic state, then guides the user to move the app to Trash.
+**Settings… → General** holds update checking, automatic checks, and launch at login. **Settings… → Support → Report a Problem…** shows an editable diagnostic summary and recent Lid Awake unified-log events before opening a prefilled GitHub issue. The user can copy the report and nothing is submitted automatically. **Send Feedback…** opens an issue without diagnostics. **Uninstall…** ends any session, verifies normal sleep, unregisters the helper and login item, offers removal of preferences and diagnostic state, then guides the user to move the app to Trash.
 
 English is the source language and German is available through the macOS app language setting.
 
