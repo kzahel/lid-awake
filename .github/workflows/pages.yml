@@ -1,0 +1,49 @@
+name: Publish website
+
+on:
+  push:
+    branches: [main]
+    paths: ['website/**', 'scripts/build-website.py', 'appcast.xml', 'Resources/Assets.xcassets/AppIcon.appiconset/icon-256.png', '.github/workflows/pages.yml']
+  # The release job pushes appcast.xml with GITHUB_TOKEN, which does not
+  # trigger push workflows. Run after that job has published the feed.
+  workflow_run:
+    workflows: ['Build and release']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Read the feed committed after the tag, and never execute PR code.
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python3 scripts/build-website.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/website
+      - uses: actions/deploy-pages@v4
+        id: deployment

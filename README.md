@@ -2,7 +2,7 @@
 
 Keep your MacBook awake from the menu bar—even with the lid closed. Run until you turn it off, until you unplug, or for a chosen time. Normal sleep returns when the session ends, on serious heat, or if the app stops responding.
 
-**macOS 13 or later · [Download a test release](https://github.com/kzahel/lid-awake/releases)**
+**macOS 13 or later · [Website & download](https://kzahel.github.io/lid-awake/) · [All releases](https://github.com/kzahel/lid-awake/releases)**
 
 ## Get started
 

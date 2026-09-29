@@ -28,3 +28,31 @@ xcrun stapler validate '/Applications/Lid Awake.app'
 ```
 
 Sparkle replacement from 0.0.4 to 0.0.5 was tested in the VM with a previously approved helper. The new app detected that the registered helper was stale, **Repair Helper…** registered the new helper, and the helper toggled the sleep setting afterward without a new password prompt in that VM. Scheduled daily update discovery has not been observed through a full interval. CI success alone does not establish the behavior of an installed update.
+
+## Website and download link
+
+The landing page lives at `https://kzahel.github.io/lid-awake/`. Share
+`https://kzahel.github.io/lid-awake/download/` for a permanent download address.
+That page redirects to the exact published DMG and includes a clickable fallback.
+The landing page's main button links directly to the DMG.
+
+`python3 scripts/build-website.py` generates `build/website/` from `website/` and
+`appcast.xml`, using only the Python standard library. Preview with
+`python3 -m http.server 8000 --directory build/website`.
+The highest Sparkle build number supplies the version and minimum macOS version;
+the DMG and ZIP share the naming convention in `scripts/package-release.sh`.
+The build fails if the feed's URL no longer follows that convention. Versions
+`0.0.x` are labeled previews, matching the release workflow. The site follows
+the same release pointer as the in-app updater, including these previews.
+
+Enable GitHub Pages once under **Settings → Pages → Source → GitHub Actions**.
+The `Publish website` workflow deploys changes to the website and feed, can be
+run manually, and also runs after a successful push-triggered `Build and release`
+workflow. This last trigger is needed because the release job's `GITHUB_TOKEN`
+push of `appcast.xml` does not itself trigger a push workflow. The website job
+always checks out `main`; it does not execute code from pull requests.
+
+There is no visitor-side GitHub API call, API pagination, or update-server dependency.
+A failed deployment leaves the previous website in place; rerun `Publish website`
+after fixing the failure. Verify its download target against the published release
+before sharing the site. Generated files remain under the ignored `build/` directory.
