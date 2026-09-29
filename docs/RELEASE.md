@@ -1,5 +1,23 @@
 # Release operations
 
+## Release command
+
+Use `./scripts/release.sh MAJOR.MINOR.PATCH` after committing and pushing the
+changes and matching changelog entry to `main`. This is the release entry point;
+do not create tags or GitHub Releases by hand.
+
+The tag supplies the release version. CI sets `MARKETING_VERSION` and
+`CURRENT_PROJECT_VERSION` for the app and helper at build time, so there is no
+separate version bump in `project.yml` or the Xcode project. After publishing
+the artifacts, CI updates `appcast.xml`; the website workflow then rebuilds the
+download links from that feed. No manual website or Graehl Arts edit is needed.
+
+Wait for **Build and release** and the subsequent **Publish website** run to
+succeed, verify that the live download points to the new DMG, then run
+`git pull --ff-only` to pick up the generated feed commit. If publishing the
+website fails, fix and rerun that workflow; do not create another release tag
+just to refresh the site.
+
 ## Signing credentials
 
 The release job uses a Developer ID Application certificate, an App Store Connect API key for notarization, and a Lid Awake-specific Sparkle EdDSA key. Keep private material outside this repository and provide it through GitHub Actions repository secrets. The required secret names are in [the release workflow](../.github/workflows/build.yml). Never print credential values in logs.

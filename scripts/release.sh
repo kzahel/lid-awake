@@ -47,4 +47,7 @@ python3 scripts/release-notes.py "$version" >/dev/null
 
 git tag "$tag"
 git push origin "$tag"
-echo "Pushed $tag; CI will build, sign, notarize, and publish the release."
+echo "Pushed $tag; CI will set the app version to $version, build, test, sign, notarize, and publish."
+echo "CI will update appcast.xml, then Publish website will refresh the download links automatically."
+echo "Verify both workflows and https://kzahel.github.io/lid-awake/ before reporting the release complete."
+echo "After CI publishes the feed, run git pull --ff-only to bring main up to date."
